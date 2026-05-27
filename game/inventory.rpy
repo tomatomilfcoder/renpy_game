@@ -1,7 +1,3 @@
-################################################################################
-## Inventory system
-################################################################################
-
 init python:
 
     INVENTORY_COLS = 7
@@ -114,7 +110,7 @@ init python:
 define item_antidote = register_item(Item(
     "antidote",
     _("Антидот"),
-    _("Снимает действие змеиного яда. Желательно применять до того, как ситуация станет совсем неловкой."),
+    _("Снимает действие яда."),
     icon="#2d8a4e",
     usable=True,
     max_stack=5,
@@ -124,7 +120,7 @@ define item_antidote = register_item(Item(
 define item_bandage = register_item(Item(
     "bandage",
     _("Бинт"),
-    _("Обычный бинт. Не лечит всё, но хоть что-то."),
+    _("Обычный бинт."),
     icon="#c9a86c",
     usable=True,
     max_stack=10,
@@ -133,7 +129,7 @@ define item_bandage = register_item(Item(
 define item_lube = register_item(Item(
     "lube",
     _("Смазка"),
-    _("На всякий случай. В инвентаре занимает слишком много места в голове."),
+    _("На всякий случай."),
     icon="#66c1e0",
     usable=False,
     max_stack=3,
@@ -160,8 +156,6 @@ label use_antidote:
         return
 
     $ player_inventory.remove("antidote")
-    g2 "Пей, это антидот."
-    g1 "Уже лучше... наверное."
     return
 
 
