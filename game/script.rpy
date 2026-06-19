@@ -1,11 +1,19 @@
 image jean = "jean.png"
 image alexander = "alexander.png"
-image bg bg1:
+
+image bg cockpit:
     "cockpit.jpg"
     xysize(1920, 1080)
+
+image bg lounge:
+    "bg1.png:"
+    xysize(1920, 1080)
+
 image glowing_fish:
     "glowing_fish.jpg"
     xysize(1920, 1080)
+
+
 
 define alexander = Character("Александр")
 define jean = Character("Жан")
@@ -20,7 +28,7 @@ label start:
     jump room_navigation
 
 label jean_dialogue:
-    scene bg bg1
+    scene bg lounge
     show alexander at left:
         zoom 0.4
     show jean at right:
@@ -53,7 +61,7 @@ label jean_dialogue:
     jean "Конечно! Давление здесь 40 атмосфер — ровно как на глубине трёх километров. Стёкла аквариума из спецсплава 'Керамет', выдерживают до 60."
     jean "Автопилот следит за всем автоматически… Но я лично каждые сутки проверяю руками все показатели. Без этого эти красавцы не выжили бы и дня."
     
-    scene bg bg1
+    scene bg cockpit
     show alexander at left:
         zoom 0.4
     show jean at right:
@@ -183,7 +191,7 @@ label after_electrical_repair:
     alexander "Я постараюсь разобраться."
     jean "Предохранители… в техническом отсеке…"
 
-    scene bg bg1
+    scene bg cockpit
     with dissolve
 
     jean "Вы… сделали это?"
@@ -209,7 +217,7 @@ label acid_analysis_dialogue:
     jean "Пробирка оранжевая... Возьмите её аккуратно — кислота может проесть даже перчатки."
     jean "И будьте осторожны."
 
-    scene bg bg1
+    scene bg cockpit
     with dissolve
 
     alexander "Капитан, кислота проела даже стеклянную колбу. Нужно взять другую ёмкость. Где здесь лаборатория?"
