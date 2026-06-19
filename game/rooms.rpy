@@ -64,13 +64,22 @@ init python:
             player_inventory.remove(item_id, amount)
 
     room_db = {
-        "bridge": Room(
-            "bridge",
+        "cockpit": Room(
+            "cockpit",
             _("Капитанская рубка"),
             "cockpit.jpg",
             exits={
-                "right": "engine",
+                "right": "lounge",
                 "down": "storage",
+            },
+            interactions=[]
+        ),
+        "lounge": Room(
+            "lounge",
+            _("Комната отдыха"),
+            "bg1.png",
+            exits={
+                "left": "cockpit",
             },
             interactions=[
                 RoomInteraction(
@@ -82,33 +91,14 @@ init python:
                     image="jean",
                     zoom=0.5,
                 ),
-            ],
-        ),
-        "engine": Room(
-            "engine",
-            _("Электроотсек"),
-            "bg1.png",
-            exits={
-                "left": "bridge",
-            },
-            interactions=[
-                RoomInteraction(
-                    "electrical_panel",
-                    _("Электрощит"),
-                    "electrical_panel",
-                    xpos=1190,
-                    ypos=440,
-                    xsize=330,
-                    ysize=260,
-                ),
-            ],
+            ]
         ),
         "storage": Room(
             "storage",
             _("Склад"),
             "bg1.png",
             exits={
-                "up": "bridge",
+                "up": "cockpit",
             },
             interactions=[
                 RoomInteraction(
@@ -119,6 +109,15 @@ init python:
                     ypos=590,
                     xsize=360,
                     ysize=220,
+                ),
+                RoomInteraction(
+                    "electrical_panel",
+                    _("Электрощит"),
+                    "electrical_panel",
+                    xpos=1190,
+                    ypos=440,
+                    xsize=330,
+                    ysize=260,
                 ),
             ],
         ),
@@ -278,7 +277,7 @@ init python:
         renpy.restart_interaction()
 
 
-default current_room_id = "bridge"
+default current_room_id = "cockpit"
 default jean_dialogue_seen = False
 
 default storage_fuses_collected = False

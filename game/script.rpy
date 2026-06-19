@@ -6,7 +6,7 @@ image bg cockpit:
     xysize(1920, 1080)
 
 image bg lounge:
-    "bg1.png:"
+    "bg1.png"
     xysize(1920, 1080)
 
 image glowing_fish:
@@ -24,7 +24,7 @@ label start:
     show screen game_timer
     show screen hallucination_sound_loop
     $ set_hallucination_state(True)
-    $ current_room_id = "bridge"
+    $ current_room_id = "lounge"
     jump room_navigation
 
 label jean_dialogue:
