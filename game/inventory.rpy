@@ -1,8 +1,9 @@
 init python:
 
-    INVENTORY_COLS = 7
-    INVENTORY_ROWS = 3
+    INVENTORY_COLS = 16
+    INVENTORY_ROWS = 16
     INVENTORY_TOTAL_SLOTS = INVENTORY_COLS * INVENTORY_ROWS
+    INVENTORY_SLOT_SIZE = 48
 
     class Item(object):
         def __init__(self, id, name, description, icon=None, usable=False, max_stack=99, use_label=None):
@@ -20,7 +21,7 @@ init python:
 
         @property
         def capacity(self):
-            return inventory_unlocked
+            return INVENTORY_TOTAL_SLOTS
 
         def count(self, item_id):
             return self.slots.get(item_id, 0)
@@ -72,9 +73,7 @@ init python:
             slots = []
 
             for i in range(INVENTORY_TOTAL_SLOTS):
-                if i >= inventory_unlocked:
-                    slots.append({"state": "locked"})
-                elif i < len(entries):
+                if i < len(entries):
                     item, count = entries[i]
                     slots.append({"state": "filled", "item": item, "count": count})
                 else:
@@ -136,7 +135,6 @@ define item_lube = register_item(Item(
 ))
 
 default player_inventory = Inventory()
-default inventory_unlocked = 7
 
 
 label give_item(item_id, amount=1):
@@ -191,55 +189,47 @@ screen inventory():
                     yalign 0.5
                     action Hide("inventory")
 
-            ## Slot grid (7 x 3)
-            grid INVENTORY_COLS INVENTORY_ROWS:
-                style_prefix "inventory"
-                xalign 0.5
-                spacing 10
+            ## Slot grid (16 x 16)
+            viewport:
+                style "inventory_grid_viewport"
+                scrollbars "vertical"
+                mousewheel True
+                draggable True
 
-                for slot in player_inventory.grid_slots():
+                grid INVENTORY_COLS INVENTORY_ROWS:
+                    style_prefix "inventory"
+                    xalign 0.5
+                    spacing 6
 
-                    if slot["state"] == "locked":
-                        frame:
-                            style "inventory_slot_locked"
+                    for slot in player_inventory.grid_slots():
 
-                            text "🔒":
-                                style "inventory_lock_icon"
-                                xalign 0.5
-                                yalign 0.5
+                        if slot["state"] == "empty":
+                            frame:
+                                style "inventory_slot_empty"
 
-                    elif slot["state"] == "empty":
-                        frame:
-                            style "inventory_slot_empty"
+                        else:
+                            $ item = slot["item"]
+                            $ count = slot["count"]
 
-                    else:
-                        $ item = slot["item"]
-                        $ count = slot["count"]
+                            button:
+                                style "inventory_slot_button"
+                                action SetScreenVariable("selected_item", item)
+                                selected (selected_item == item)
 
-                        button:
-                            style "inventory_slot_button"
-                            action SetScreenVariable("selected_item", item)
-                            selected (selected_item == item)
+                                fixed:
+                                    xysize (INVENTORY_SLOT_SIZE, INVENTORY_SLOT_SIZE)
 
-                            fixed:
-                                xysize (128, 128)
+                                    add Solid(item.icon):
+                                        xalign 0.5
+                                        yalign 0.5
+                                        xysize (28, 28)
 
-                                text "[item.name!t]":
-                                    style "inventory_slot_name"
-                                    xalign 0.5
-                                    ypos 6
-
-                                add Solid(item.icon):
-                                    xalign 0.5
-                                    yalign 0.5
-                                    xysize (72, 72)
-
-                                text "x[count]":
-                                    style "inventory_slot_qty"
-                                    xalign 1.0
-                                    yalign 1.0
-                                    xoffset -8
-                                    yoffset -6
+                                    text "x[count]":
+                                        style "inventory_slot_qty"
+                                        xalign 1.0
+                                        yalign 1.0
+                                        xoffset -4
+                                        yoffset -3
 
             ## Description (below grid, scrollable)
             if selected_item and player_inventory.has(selected_item.id):
@@ -297,16 +287,13 @@ screen inventory_button():
 init python:
     config.overlay_screens.append("inventory_button")
 
-
 style inventory_frame is empty
 style inventory_title is gui_text
 style inventory_close_button is button
+style inventory_grid_viewport is gui_viewport
 style inventory_slot_button is button
 style inventory_slot_empty is empty
-style inventory_slot_locked is empty
-style inventory_slot_name is gui_text
 style inventory_slot_qty is gui_text
-style inventory_lock_icon is gui_text
 style inventory_desc_panel is empty
 style inventory_desc_viewport is gui_viewport
 style inventory_item_name is gui_text
@@ -341,39 +328,28 @@ style inventory_close_button_text:
     xalign 0.5
     yalign 0.5
 
+style inventory_grid_viewport:
+    xsize 980
+    ysize 560
+
 style inventory_slot_button is default:
     background Solid("#252525")
     hover_background Solid("#353535")
     selected_background Solid("#3d4a5c")
     padding (0, 0)
-    xsize 128
-    ysize 128
+    xsize INVENTORY_SLOT_SIZE
+    ysize INVENTORY_SLOT_SIZE
 
 style inventory_slot_empty:
     background Solid("#1a1a1a")
-    xsize 128
-    ysize 128
-
-style inventory_slot_locked:
-    background Solid("#1a1a1a")
-    xsize 128
-    ysize 128
-
-style inventory_slot_name:
-    size 16
-    color "#cccccc"
-    text_align 0.5
-    xmaximum 120
+    xsize INVENTORY_SLOT_SIZE
+    ysize INVENTORY_SLOT_SIZE
 
 style inventory_slot_qty:
-    size 18
+    size 12
     color "#ffffff"
     bold True
     outlines [(2, "#000000", 0, 0)]
-
-style inventory_lock_icon:
-    size 36
-    color "#666666"
 
 style inventory_desc_panel:
     background Solid("#1a1a1a")
