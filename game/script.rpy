@@ -1,19 +1,22 @@
-$ import hallucinations
-
 image jean = "jerma menacing.png"
 image alexander = "jerma happy.png"
-image bg submarine_placeholder:
-    "submarine.jpg"
+image bg bg1:
+    "bg1.png"
     xysize(1920, 1080)
 
 define alexander = Character("Александр")
 define jean = Character("Жан")
 
 label start:
-    scene bg submarine_placeholder
+    play music "ambience.mp3" loop
+
     show screen hallucination_sound_loop
     $ set_hallucination_state(True)
-    
+    $ current_room_id = "bridge"
+    jump room_navigation
+
+label jean_dialogue:
+    scene bg bg1
     show alexander at left with dissolve
     alexander "Здравствуйте, Александр, я не прочь пообщаться"
     show jean at right with dissolve
@@ -147,5 +150,8 @@ label start:
     jean "Ой… Ладно, танцы подождут."
     jean "Но дружба… Она не знает возраста. Рад, что судьба свела нас."
 
+    $ jean_dialogue_seen = True
+    jump room_navigation
+
 label start_scene:
-    
+    jump room_navigation

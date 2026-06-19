@@ -2,11 +2,17 @@
 ## Replace or extend this list later with imported audio paths, for example:
 ## define hallucination_sounds = imported_hallucination_sounds
 define hallucination_sounds = [
-    "audio/hallucinations/DS_item_acquired.mp3",
+    "audio/hallucinations/hal1.mp3",
+    "audio/hallucinations/hal2.mp3",
+    "audio/hallucinations/hal3.mp3",
+    "audio/hallucinations/hal4.mp3",
+    "audio/hallucinations/hal5.mp3",
+    "audio/hallucinations/hal6.mp3",
+    "audio/hallucinations/hal7.mp3",
 ]
 
-define hallucination_min_delay = 12.0
-define hallucination_max_delay = 35.0
+define hallucination_min_delay = 115.0
+define hallucination_max_delay = 150.0
 
 default hallucination_audio_active = False
 default hallucination_next_play_at = 0.0
