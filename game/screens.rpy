@@ -355,26 +355,84 @@ screen main_menu():
     ## This ensures that any other menu screen is replaced.
     tag menu
 
-    add gui.main_menu_background
+    add "bg1.png":
+        xysize (1920, 1080)
 
-    ## This empty frame darkens the main menu.
+    add "#00000099"
+
     frame:
-        style "main_menu_frame"
-
-    ## The use statement includes another screen inside this one. The actual
-    ## contents of the main menu are in the navigation screen.
-    use navigation
-
-    if gui.show_name:
+        style "custom_main_menu_frame"
+        xalign 0.08
+        yalign 0.5
 
         vbox:
-            style "main_menu_vbox"
+            spacing 22
 
             text "[config.name!t]":
-                style "main_menu_title"
+                style "custom_main_menu_title"
 
-            text "[config.version]":
-                style "main_menu_version"
+            textbutton _("Играть"):
+                style "custom_main_menu_button"
+                action Start()
+
+            textbutton _("Настройки"):
+                style "custom_main_menu_button"
+                action ShowMenu("preferences")
+
+            textbutton _("Концовки"):
+                style "custom_main_menu_button"
+                action ShowMenu("endings_gallery")
+
+            textbutton _("Выйти"):
+                style "custom_main_menu_button"
+                action Quit(confirm=True)
+
+
+screen endings_gallery():
+    tag menu
+
+    add "cockpit.jpg":
+        xysize (1920, 1080)
+
+    add "#000000cc"
+
+    frame:
+        style "endings_gallery_frame"
+        xalign 0.5
+        yalign 0.5
+
+        vbox:
+            spacing 24
+
+            text _("Концовки"):
+                style "endings_gallery_title"
+
+            hbox:
+                spacing 24
+
+                frame:
+                    style "ending_card"
+
+                    vbox:
+                        spacing 12
+
+                        if persistent.timeout_ending_unlocked:
+                            add "cockpit.jpg":
+                                xysize (360, 220)
+
+                            text _("Плохая концовка: время вышло"):
+                                style "ending_card_title"
+                        else:
+                            add Solid("#000000"):
+                                xysize (360, 220)
+
+                            text _("Концовка не открыта"):
+                                style "ending_card_locked"
+
+            textbutton _("Назад"):
+                style "custom_main_menu_button"
+                xalign 0.5
+                action ShowMenu("main_menu")
 
 
 style main_menu_frame is empty
@@ -382,6 +440,14 @@ style main_menu_vbox is vbox
 style main_menu_text is gui_text
 style main_menu_title is main_menu_text
 style main_menu_version is main_menu_text
+style custom_main_menu_frame is empty
+style custom_main_menu_title is gui_text
+style custom_main_menu_button is button
+style endings_gallery_frame is empty
+style endings_gallery_title is gui_text
+style ending_card is empty
+style ending_card_title is gui_text
+style ending_card_locked is gui_text
 
 style main_menu_frame:
     xsize 420
@@ -404,6 +470,56 @@ style main_menu_title:
 
 style main_menu_version:
     properties gui.text_properties("version")
+
+style custom_main_menu_frame:
+    background Solid("#071018dd")
+    padding (42, 38)
+    xsize 520
+
+style custom_main_menu_title:
+    size 48
+    color "#ffffff"
+    bold True
+
+style custom_main_menu_button is default:
+    background Solid("#1d2b3a")
+    hover_background Solid("#35516e")
+    padding (24, 14)
+    xsize 360
+
+style custom_main_menu_button_text:
+    size 30
+    color "#ffffff"
+    hover_color "#ffe08a"
+    xalign 0.5
+    text_align 0.5
+
+style endings_gallery_frame:
+    background Solid("#071018ee")
+    padding (42, 38)
+    xsize 980
+
+style endings_gallery_title:
+    size 46
+    color "#ffffff"
+    bold True
+
+style ending_card:
+    background Solid("#111722")
+    padding (18, 18)
+    xsize 396
+
+style ending_card_title:
+    size 24
+    color "#ffffff"
+    text_align 0.5
+    xalign 0.5
+
+style ending_card_locked:
+    size 24
+    color "#bbbbbb"
+    text_align 0.5
+    xalign 0.5
 
 
 ## Game Menu screen ############################################################

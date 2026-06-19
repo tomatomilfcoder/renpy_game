@@ -134,6 +134,60 @@ define item_lube = register_item(Item(
     max_stack=3,
 ))
 
+define item_fuse_3 = register_item(Item(
+    "fuse_3",
+    _("Предохранитель 3 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: 3 Ом."),
+    icon="#e0c066",
+    usable=False,
+    max_stack=3,
+))
+
+define item_fuse_5 = register_item(Item(
+    "fuse_5",
+    _("Предохранитель 5 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: 5 Ом."),
+    icon="#d8944a",
+    usable=False,
+    max_stack=3,
+))
+
+define item_fuse_6 = register_item(Item(
+    "fuse_6",
+    _("Предохранитель 6 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: 6 Ом."),
+    icon="#c96b42",
+    usable=False,
+    max_stack=3,
+))
+
+define item_fuse_8 = register_item(Item(
+    "fuse_8",
+    _("Предохранитель 8 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: 8 Ом."),
+    icon="#9f6bd1",
+    usable=False,
+    max_stack=3,
+))
+
+define item_fuse_9 = register_item(Item(
+    "fuse_9",
+    _("Предохранитель 9 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: 9 Ом."),
+    icon="#6f8ed8",
+    usable=False,
+    max_stack=3,
+))
+
+define item_fuse_11 = register_item(Item(
+    "fuse_11",
+    _("Предохранитель 11 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: 11 Ом."),
+    icon="#5da890",
+    usable=False,
+    max_stack=3,
+))
+
 default player_inventory = Inventory()
 
 
