@@ -127,28 +127,28 @@ init python:
         "storage": Room(
             "storage",
             _("Склад"),
-            "lounge.png",
+            "/Utility/Utility.png",
             exits={
                 "up": "hall",
             },
             interactions=[
                 RoomInteraction(
                     "fuse_box",
-                    _("Ящик с предохранителями"),
+                    _("Ящик с\nпредохранителями"),
                     "collect_storage_fuses",
-                    xpos=730,
-                    ypos=590,
-                    xsize=360,
-                    ysize=220,
+                    xpos=800,
+                    ypos=500,
+                    xsize=350,
+                    ysize=150,
                 ),
                 RoomInteraction(
                     "electrical_panel",
                     _("Электрощит"),
                     "electrical_panel",
-                    xpos=1190,
-                    ypos=440,
-                    xsize=330,
-                    ysize=260,
+                    xpos=1600,
+                    ypos=480,
+                    xsize=200,
+                    ysize=100,
                 ),
             ],
         ),
@@ -408,7 +408,10 @@ screen room_navigation():
             imagebutton:
                 idle Transform(interaction.image, zoom=interaction.zoom)
                 hover Transform(interaction.image, zoom=interaction.zoom, matrixcolor=BrightnessMatrix(0.18))
-                action Jump(interaction.label)
+                if interaction.id == "fuse_box":
+                    action Function(collect_storage_fuses_from_room)
+                else:
+                    action Jump(interaction.label)
                 xpos interaction.xpos
                 ypos interaction.ypos
                 xanchor 0.5
@@ -423,6 +426,8 @@ screen room_navigation():
                     action Jump(interaction.label)
                 xpos interaction.xpos
                 ypos interaction.ypos
+                xanchor 0.5
+                yanchor 1.0
                 xsize interaction.xsize
                 ysize interaction.ysize
 
@@ -631,8 +636,8 @@ style room_title_text:
     bold True
 
 style room_interaction_button is default:
-    background Solid("#ffffff18")
-    hover_background Solid("#ffffff44")
+    background Solid("#ffffff55")
+    hover_background Solid("#ffff88aa")
     padding (12, 8)
 
 style room_interaction_button_text:
