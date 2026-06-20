@@ -76,7 +76,7 @@ init python:
         "lounge": Room(
             "lounge",
             _("Комната отдыха"),
-            "bg1.png",
+            "lounge.png",
             exits={
                 "left": "cockpit",
                 "right": "storage",
@@ -96,7 +96,7 @@ init python:
         "storage": Room(
             "storage",
             _("Склад"),
-            "bg1.png",
+            "lounge.png",
             exits={
                 "left": "lounge",
             },
@@ -277,7 +277,7 @@ init python:
         renpy.restart_interaction()
 
 
-default current_room_id = "cockpit"
+default current_room_id = "lounge"
 default jean_dialogue_seen = False
 
 default storage_fuses_collected = False
@@ -367,33 +367,36 @@ screen room_navigation():
                 xsize interaction.xsize
                 ysize interaction.ysize
 
-    if "left" in room.exits:
-        textbutton "←":
-            style "room_arrow_button"
-            action Function(set_current_room, room.exits["left"])
-            xalign 0.02
-            yalign 0.5
+    $ exits_unlocked = jean_dialogue_seen or room.id != "lounge"
 
-    if "right" in room.exits:
-        textbutton "→":
-            style "room_arrow_button"
-            action Function(set_current_room, room.exits["right"])
-            xalign 0.98
-            yalign 0.5
+    if exits_unlocked:
+        if "left" in room.exits:
+            textbutton "←":
+                style "room_arrow_button"
+                action Function(set_current_room, room.exits["left"])
+                xalign 0.02
+                yalign 0.5
 
-    if "up" in room.exits:
-        textbutton "↑":
-            style "room_arrow_button"
-            action Function(set_current_room, room.exits["up"])
-            xalign 0.5
-            yalign 0.04
+        if "right" in room.exits:
+            textbutton "→":
+                style "room_arrow_button"
+                action Function(set_current_room, room.exits["right"])
+                xalign 0.98
+                yalign 0.5
 
-    if "down" in room.exits:
-        textbutton "↓":
-            style "room_arrow_button"
-            action Function(set_current_room, room.exits["down"])
-            xalign 0.5
-            yalign 0.94
+        if "up" in room.exits:
+            textbutton "↑":
+                style "room_arrow_button"
+                action Function(set_current_room, room.exits["up"])
+                xalign 0.5
+                yalign 0.04
+
+        if "down" in room.exits:
+            textbutton "↓":
+                style "room_arrow_button"
+                action Function(set_current_room, room.exits["down"])
+                xalign 0.5
+                yalign 0.94
 
 
 screen electricity_minigame():
