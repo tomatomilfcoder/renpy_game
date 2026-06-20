@@ -9,7 +9,7 @@ image jean = "jean.png"
 image alexander = "alexander.png"
 
 image bg cockpit:
-    "cockpit.jpg"
+    "cockpit.png"
     xysize(1920, 1080)
 
 image bg lounge:
