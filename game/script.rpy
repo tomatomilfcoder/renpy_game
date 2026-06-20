@@ -92,6 +92,8 @@ label jean_dialogue:
     
     play audio "alarm.mp3" volume 0.5
     play audio "crash.mp3" volume 0.5
+    stop music
+    play music "glitch.mp3" loop
     scene bg cockpit at shake
     pause 8.0
 
@@ -147,6 +149,10 @@ label jean_dialogue:
     show jean at right:
         zoom 0.5
     with dissolve
+
+    stop music
+    play music "main_ambient.mp3" loop
+
     alexander "Капитан, вы проснулись."
     jean "Вы… это вы сделали?"
     alexander "Да, конечно. Бортовой компьютер произнес что мощность сильно ограничены, на обход кислоты около 16 часов."
