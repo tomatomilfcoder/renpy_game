@@ -41,13 +41,13 @@ init python:
                 return False
 
             if current == 0 and len(self.slots) >= self.capacity:
-                renpy.notify(_("Инвентарь полон."))
+                push_game_notification(_("Инвентарь полон."))
                 return False
 
             self.slots[item_id] = current + gained
 
             if notify_player:
-                renpy.notify(_("Получено: [name] x[count]").format(name=item.name, count=gained))
+                push_game_notification(_("Получено: [name] x[count]").format(name=item.name, count=gained))
 
             return True
 
@@ -82,6 +82,30 @@ init python:
             return slots
 
     item_db = {}
+    STACKED_NOTIFICATION_DURATION = 3.25
+
+    def push_game_notification(message):
+        global stacked_notification_next_id
+
+        stacked_notifications.append({
+            "id": stacked_notification_next_id,
+            "message": message,
+            "expires_at": renpy.get_game_runtime() + STACKED_NOTIFICATION_DURATION,
+        })
+        stacked_notification_next_id += 1
+        renpy.show_screen("stacked_notifications")
+        renpy.restart_interaction()
+
+    def prune_stacked_notifications():
+        now = renpy.get_game_runtime()
+        stacked_notifications[:] = [
+            notification
+            for notification in stacked_notifications
+            if notification["expires_at"] > now
+        ]
+
+        if not stacked_notifications:
+            renpy.hide_screen("stacked_notifications")
 
     def register_item(item):
         item_db[item.id] = item
@@ -96,43 +120,14 @@ init python:
             return
 
         if not item.usable:
-            renpy.notify(_("Этот предмет нельзя использовать."))
+            push_game_notification(_("Этот предмет нельзя использовать."))
             return
 
         if item.use_label:
             renpy.call_in_new_context(item.use_label)
         else:
             player_inventory.remove(item_id)
-            renpy.notify(_("Использовано: [name]").format(name=item.name))
-
-
-define item_antidote = register_item(Item(
-    "antidote",
-    _("Антидот"),
-    _("Снимает действие яда."),
-    icon="#2d8a4e",
-    usable=True,
-    max_stack=5,
-    use_label="use_antidote",
-))
-
-define item_bandage = register_item(Item(
-    "bandage",
-    _("Бинт"),
-    _("Обычный бинт."),
-    icon="#c9a86c",
-    usable=True,
-    max_stack=10,
-))
-
-define item_lube = register_item(Item(
-    "lube",
-    _("Смазка"),
-    _("На всякий случай."),
-    icon="#66c1e0",
-    usable=False,
-    max_stack=3,
-))
+            push_game_notification(_("Использовано: [name]").format(name=item.name))
 
 define item_fuse_3 = register_item(Item(
     "fuse_3",
@@ -189,6 +184,8 @@ define item_fuse_11 = register_item(Item(
 ))
 
 default player_inventory = Inventory()
+default stacked_notifications = []
+default stacked_notification_next_id = 0
 
 
 label give_item(item_id, amount=1):

@@ -63,6 +63,22 @@ init python:
         for item_id, amount in removed_by_id.items():
             player_inventory.remove(item_id, amount)
 
+    def collect_storage_fuses_from_room():
+        global storage_fuses_collected
+
+        if storage_fuses_collected:
+            push_game_notification(_("Ящик пуст. Все подходящие предохранители уже у меня."))
+            return
+
+        player_inventory.add("fuse_3", 1)
+        player_inventory.add("fuse_5", 1)
+        player_inventory.add("fuse_6", 1)
+        player_inventory.add("fuse_8", 1)
+        player_inventory.add("fuse_9", 1)
+        player_inventory.add("fuse_11", 1)
+        storage_fuses_collected = True
+        push_game_notification(_("Я нашёл несколько предохранителей разного сопротивления."))
+
     room_db = {
         "cockpit": Room(
             "cockpit",
@@ -361,7 +377,10 @@ screen room_navigation():
         else:
             textbutton "[interaction.name!t]":
                 style "room_interaction_button"
-                action Jump(interaction.label)
+                if interaction.id == "fuse_box":
+                    action Function(collect_storage_fuses_from_room)
+                else:
+                    action Jump(interaction.label)
                 xpos interaction.xpos
                 ypos interaction.ypos
                 xsize interaction.xsize
