@@ -27,6 +27,9 @@ image glowing_fish:
 image black_screen:
     "black_screen.png"
     xysize(1920, 1080)
+image bg medal:
+    "Gramota.png"
+    xysize(1920, 1080)
 
 define alexander = Character("Александр")
 define jean = Character("Жан")
@@ -208,10 +211,19 @@ label jean_dialogue:
     jean "Возьмите на память. Вы заслужили."
     alexander "Вы уверены? Это ведь память для вас."
     jean "Абсолютно уверен."
+
+    scene bg medal
+    show alexander at left:
+        zoom 0.4
+    show jean at right:
+        zoom 0.5
+    with dissolve
+
     jean "Мне эти годы были дороги… но я уже отдал их флоту. А вы — единственный человек здесь, кто поступил как настоящий моряк: спокоен в беде и помог другим."
     jean "Пусть этот жетон напоминает вам о том дне... когда вы спасли капитана."
     alexander "Я буду вас вспоминать, глядя на него."
     jean "Спасибо…"
+    scene bg cockpit
     alexander "Такие тяжелые испытания... действительно сближают."
     jean "Да... Такое не забывается."
     jean "После войны или кораблекрушения люди либо становятся врагами… Либо друзьями навсегда."
