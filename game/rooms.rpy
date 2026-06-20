@@ -316,10 +316,32 @@ init python:
             "Lab/Laboratory.png",
             exits={
                 "down": "hall",
+                "right": "rockets",
+                "left": "kitchen",
+            },
+            interactions=[],
+        ),
+        "rockets": Room(
+            "rockets",
+            _("Торпедный отсек"),
+            "rockets.png",
+            exits={
+                "left": "lab",
+            },
+            interactions=[],
+        ),
+
+    "kitchen": Room(
+            "kitchen",
+            _("Кухня"),
+            "kitchen.png",
+            exits={
+                "right": "lab",
             },
             interactions=[],
         ),
     }
+
 
     def selected_fuse_sum():
         fuses = inventory_fuses()
