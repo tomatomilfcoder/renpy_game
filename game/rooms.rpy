@@ -274,8 +274,8 @@ init python:
                     "collect_screwdriver",
                     xpos=980,
                     ypos=980,
-                    xsize=180,
-                    ysize=80,
+                    image="/tools/screwdriver.png",
+                    zoom=0.25,
                 ),
             ],
         ),
@@ -600,9 +600,28 @@ screen room_navigation():
                     xanchor 0.5
                     yanchor 1.0
                     alt interaction.name
+            # else:
+            #     textbutton "[interaction.name!t]":
+            #         style "room_interaction_button"
+            #         if interaction.id == "fuse_box":
+            #             action Function(collect_storage_fuses_from_room)
+            #         elif interaction.id == "lab_panel":
+            #             action Function(interact_lab_panel)
+            #         elif interaction.id == "screwdriver_floor":
+            #             action Function(collect_screwdriver_from_room)
+            #         else:
+            #             action Jump(interaction.label)
+            #         xpos interaction.xpos
+            #         ypos interaction.ypos
+            #         xanchor 0.5
+            #         yanchor 1.0
+            #         xsize interaction.xsize
+            #         ysize interaction.ysize
             else:
-                textbutton "[interaction.name!t]":
-                    style "room_interaction_button"
+                button:
+                    background None
+                    hover_background None
+
                     if interaction.id == "fuse_box":
                         action Function(collect_storage_fuses_from_room)
                     elif interaction.id == "lab_panel":
@@ -611,6 +630,7 @@ screen room_navigation():
                         action Function(collect_screwdriver_from_room)
                     else:
                         action Jump(interaction.label)
+
                     xpos interaction.xpos
                     ypos interaction.ypos
                     xanchor 0.5
