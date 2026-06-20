@@ -1392,6 +1392,25 @@ screen notify(message):
     timer 3.25 action Hide('notify')
 
 
+screen stacked_notifications():
+    zorder 101
+
+    timer 0.25 repeat True action Function(prune_stacked_notifications)
+
+    vbox:
+        xalign 1.0
+        xoffset -30
+        ypos gui.notify_ypos
+        spacing 8
+
+        for notification in stacked_notifications:
+            frame at notify_appear:
+                style "stacked_notify_frame"
+
+                text "[notification['message']!tq]":
+                    style "stacked_notify_text"
+
+
 transform notify_appear:
     on show:
         alpha 0
@@ -1402,6 +1421,8 @@ transform notify_appear:
 
 style notify_frame is empty
 style notify_text is gui_text
+style stacked_notify_frame is notify_frame
+style stacked_notify_text is notify_text
 
 style notify_frame:
     ypos gui.notify_ypos
@@ -1411,6 +1432,9 @@ style notify_frame:
 
 style notify_text:
     properties gui.text_properties("notify")
+
+style stacked_notify_frame:
+    ypos 0
 
 
 ## NVL screen ##################################################################
