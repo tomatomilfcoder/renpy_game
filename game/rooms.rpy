@@ -24,6 +24,9 @@ init python:
     def set_current_room(room_id):
         global current_room_id
 
+        if room_id == "lab_door" and lab_unlocked:
+            room_id = "lab"
+
         if crash_occurred and room_id == "lounge":
             show_room_phrase(_("Дверь в комнату отдыха не открывается"))
             return
@@ -36,6 +39,21 @@ init python:
         return room_db[current_room_id]
 
     def room_background(room):
+        if crash_occurred and electrical_power_failed and room.id == "cockpit":
+            return Image("Red/cockpit_red.png")
+
+        if crash_occurred and electrical_power_failed and room.id == "hall":
+            return Image("Red/hall_red.png")
+
+        if room.id == "lab_door":
+            if lab_unlocked:
+                return Image("lab_door_removed_panel.png")
+            if lab_circuit_taken:
+                return Image("lab_door_without_circit.png")
+            if lab_panel_opened:
+                return Image("lab_door_removed_panel.png")
+            return Image("lab_door.png")
+
         return Image(room.background)
 
     def show_room_phrase(message, speaker=None):
@@ -107,6 +125,84 @@ init python:
         storage_fuses_collected = True
         show_room_phrase(_("Я нашёл несколько предохранителей разного сопротивления. Этого должно хватить, если не сжечь нужные варианты."))
 
+    def collect_screwdriver_from_room():
+        global screwdriver_collected
+
+        if electrical_power_failed:
+            show_room_phrase(_("Сначала нужно восстановить питание."))
+            return
+
+        if screwdriver_collected:
+            show_room_phrase(_("На полу больше ничего полезного нет."))
+            return
+
+        player_inventory.add("screwdriver", 1)
+        screwdriver_collected = True
+        show_room_phrase(_("Я поднял отвёртку с пола."))
+
+    def interact_lab_panel():
+        global lab_panel_opened
+        global lab_panel_inspected
+        global lab_circuit_taken
+        global lab_circuit_returned
+        global lab_unlocked
+
+        if lab_unlocked:
+            set_current_room("lab")
+            return
+
+        if not lab_panel_inspected:
+            lab_panel_inspected = True
+            show_room_phrase(_("Панель держится на винтах. Нужна отвёртка."))
+            return
+
+        if not lab_panel_opened:
+            show_room_phrase(_("Нужно использовать отвёртку из инвентаря."))
+            return
+
+        if not lab_circuit_taken:
+            player_inventory.add("lab_circuit", 1)
+            lab_circuit_taken = True
+            show_room_phrase(_("Я достал плату из панели. Нужно отнести её капитану."))
+            return
+
+        if lab_hash_programmed and not lab_circuit_returned:
+            if not player_inventory.has("lab_circuit"):
+                show_room_phrase(_("Плату нужно принести обратно к панели."))
+                return
+
+            player_inventory.remove("lab_circuit", 1)
+            lab_circuit_returned = True
+            lab_unlocked = True
+            show_room_phrase(_("Я вернул плату на место. Дверь лаборатории разблокирована."))
+            return
+
+        show_room_phrase(_("Без хеша эта плата бесполезна. Нужно отнести её капитану."))
+
+    def use_screwdriver_on_lab_panel():
+        global lab_panel_opened
+        global lab_panel_inspected
+
+        if current_room_id != "lab_door":
+            push_game_notification(_("Здесь отвёртка не нужна."))
+            return
+
+        if lab_unlocked:
+            push_game_notification(_("Панель уже собрана, дверь лаборатории открыта."))
+            return
+
+        if not lab_panel_inspected:
+            push_game_notification(_("Сначала осмотрите панель у двери."))
+            return
+
+        if lab_panel_opened:
+            push_game_notification(_("Панель уже открыта."))
+            return
+
+        lab_panel_opened = True
+        renpy.hide_screen("inventory")
+        show_room_phrase(_("Я открутил крышку панели. Внутри видна плата."))
+
     room_db = {
         "cockpit": Room(
             "cockpit",
@@ -172,6 +268,15 @@ init python:
                     xsize=200,
                     ysize=100,
                 ),
+                RoomInteraction(
+                    "screwdriver_floor",
+                    _("Отвёртка"),
+                    "collect_screwdriver",
+                    xpos=980,
+                    ypos=980,
+                    xsize=180,
+                    ysize=80,
+                ),
             ],
         ),
         "hall": Room(
@@ -182,6 +287,35 @@ init python:
                 "left": "cockpit",
                 "right": "lounge",
                 "down": "storage",
+                "up": "lab_door",
+            },
+            interactions=[],
+        ),
+        "lab_door": Room(
+            "lab_door",
+            _("Дверь лаборатории"),
+            "lab_door.png",
+            exits={
+                "down": "hall",
+            },
+            interactions=[
+                RoomInteraction(
+                    "lab_panel",
+                    _("Панель двери"),
+                    "lab_panel",
+                    xpos=960,
+                    ypos=720,
+                    xsize=360,
+                    ysize=260,
+                ),
+            ],
+        ),
+        "lab": Room(
+            "lab",
+            _("Лаборатория"),
+            "Lab/Laboratory.png",
+            exits={
+                "down": "hall",
             },
             interactions=[],
         ),
@@ -345,6 +479,13 @@ default current_room_id = "lounge"
 default jean_dialogue_seen = False
 default crash_occurred = False
 default storage_fuses_collected = False
+default screwdriver_collected = False
+default lab_panel_inspected = False
+default lab_panel_opened = False
+default lab_circuit_taken = False
+default lab_hash_programmed = False
+default lab_circuit_returned = False
+default lab_unlocked = False
 default selected_fuse_indexes = []
 default burned_fuses = []
 default electrical_power_failed = True
@@ -405,6 +546,16 @@ label electrical_panel:
     jump room_navigation
 
 
+label lab_panel:
+    $ interact_lab_panel()
+    jump room_navigation
+
+
+label collect_screwdriver:
+    $ collect_screwdriver_from_room()
+    jump room_navigation
+
+
 label magic_hash_minigame:
     $ start_magic_hash_puzzle()
     while not magic_hash_solved:
@@ -429,13 +580,19 @@ screen room_navigation():
             style "room_title_text"
 
     for interaction in room.interactions:
-        if interaction.id != "captain_cockpit" or crash_occurred:
+        if (interaction.id != "captain_cockpit" or crash_occurred) and (interaction.id != "screwdriver_floor" or (not screwdriver_collected and not electrical_power_failed)):
             if interaction.image:
                 imagebutton:
                     idle Transform(interaction.image, zoom=interaction.zoom)
                     hover Transform(interaction.image, zoom=interaction.zoom, matrixcolor=BrightnessMatrix(0.18))
                     if interaction.id == "fuse_box":
                         action Function(collect_storage_fuses_from_room)
+                    elif interaction.id == "lab_panel":
+                        action Function(interact_lab_panel)
+                    elif interaction.id == "screwdriver_floor":
+                        action Function(collect_screwdriver_from_room)
+                    elif interaction.id == "captain_cockpit":
+                        action Call(interaction.label)
                     else:
                         action Jump(interaction.label)
                     xpos interaction.xpos
@@ -448,6 +605,10 @@ screen room_navigation():
                     style "room_interaction_button"
                     if interaction.id == "fuse_box":
                         action Function(collect_storage_fuses_from_room)
+                    elif interaction.id == "lab_panel":
+                        action Function(interact_lab_panel)
+                    elif interaction.id == "screwdriver_floor":
+                        action Function(collect_screwdriver_from_room)
                     else:
                         action Jump(interaction.label)
                     xpos interaction.xpos

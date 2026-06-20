@@ -219,6 +219,25 @@ define item_fuse_21 = register_item(Item(
     max_stack=3,
 ))
 
+define item_screwdriver = register_item(Item(
+    "screwdriver",
+    _("Отвёртка"),
+    _("Инструмент, которым можно снять панель рядом с дверью лаборатории."),
+    icon="#9ca3af",
+    usable=True,
+    max_stack=1,
+    use_label="use_screwdriver",
+))
+
+define item_lab_circuit = register_item(Item(
+    "lab_circuit",
+    _("Плата панели"),
+    _("Плата из панели рядом с дверью лаборатории."),
+    icon="#4ade80",
+    usable=False,
+    max_stack=1,
+))
+
 default player_inventory = Inventory()
 default stacked_notifications = []
 default stacked_notification_next_id = 0
@@ -241,6 +260,10 @@ label use_antidote:
         return
 
     $ player_inventory.remove("antidote")
+    return
+
+label use_screwdriver:
+    $ use_screwdriver_on_lab_panel()
     return
 
 
