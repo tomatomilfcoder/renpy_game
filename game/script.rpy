@@ -16,9 +16,14 @@ image bg lounge:
     "lounge.png"
     xysize(1920, 1080)
 
+image bg hall:
+    "Hall.png"
+    xysize(1920, 1080)
+
 image glowing_fish:
     "glowing_fish.jpg"
     xysize(1920, 1080)
+
 image black_screen:
     "black_screen.png"
     xysize(1920, 1080)
@@ -88,6 +93,8 @@ label jean_dialogue:
     jean "Сейчас мы на глубине 3200 метров под водой. Тихоокеанская рифтовая зона, если по картам."
     jean "А исчезнуть? Ну... старческий инфаркт среди ночи. Или просто уйду тихо — чтобы не мешать работе автопилота."
     
+    $ config.allow_skipping = False
+    $ crash_occurred = True
     play audio "alarm.mp3" volume 0.5
     play audio "crash.mp3" volume 0.5
     stop music
@@ -96,6 +103,7 @@ label jean_dialogue:
     pause 8.0
 
     Author "Внезапно раздался грохот в отделении комнат отдыха. Комнату начало затапливать. Из комнаты начали доноситься крики ужаса и паники, отчаяния. Вытекала вовсе не вода, а некая кислота. Если не загермитизировать комнату вся лодка может пойти ко дну. Затопление начало происходить прямо из-за стены, т.е. корабль случайно оказался в зоне с глубоководной кислотой"
+    $ config.allow_skipping = True
 
     show alexander at left:
         zoom 0.4
@@ -220,6 +228,7 @@ label jean_dialogue:
     jean "Но дружба… Она не знает возраста. Рад, что судьба свела нас."
 
     $ jean_dialogue_seen = True
+    $ current_room_id = "hall"
     jump room_navigation
 
 label start_scene:

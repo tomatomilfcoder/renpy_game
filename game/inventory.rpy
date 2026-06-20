@@ -47,7 +47,7 @@ init python:
             self.slots[item_id] = current + gained
 
             if notify_player:
-                push_game_notification(_("Получено: [name] x[count]").format(name=item.name, count=gained))
+                push_game_notification(_(f"Получено: {item.name} x {gained}"))
 
             return True
 

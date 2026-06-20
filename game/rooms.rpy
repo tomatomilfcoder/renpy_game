@@ -24,6 +24,10 @@ init python:
     def set_current_room(room_id):
         global current_room_id
 
+        if crash_occurred and room_id == "lounge":
+            show_room_phrase(_("Дверь в комнату отдыха не открывается"))
+            return
+
         if room_id in room_db:
             current_room_id = room_id
             renpy.restart_interaction()
@@ -33,6 +37,18 @@ init python:
 
     def room_background(room):
         return Image(room.background)
+
+    def show_room_phrase(message):
+        global room_phrase_message
+
+        room_phrase_message = message
+        renpy.restart_interaction()
+
+    def hide_room_phrase():
+        global room_phrase_message
+
+        room_phrase_message = None
+        renpy.restart_interaction()
 
     FUSE_ITEM_VALUES = {
         "fuse_3": 3,
@@ -67,7 +83,7 @@ init python:
         global storage_fuses_collected
 
         if storage_fuses_collected:
-            push_game_notification(_("Ящик пуст. Все подходящие предохранители уже у меня."))
+            show_room_phrase(_("Ящик пуст. Все подходящие предохранители уже у меня."))
             return
 
         player_inventory.add("fuse_3", 1)
@@ -77,7 +93,7 @@ init python:
         player_inventory.add("fuse_9", 1)
         player_inventory.add("fuse_11", 1)
         storage_fuses_collected = True
-        push_game_notification(_("Я нашёл несколько предохранителей разного сопротивления."))
+        show_room_phrase(_("Я нашёл несколько предохранителей разного сопротивления. Этого должно хватить, если не сжечь нужные варианты."))
 
     room_db = {
         "cockpit": Room(
@@ -85,7 +101,7 @@ init python:
             _("Капитанская рубка"),
             "cockpit.jpg",
             exits={
-                "right": "lounge",
+                "right": "hall",
             },
             interactions=[]
         ),
@@ -94,8 +110,7 @@ init python:
             _("Комната отдыха"),
             "lounge.png",
             exits={
-                "left": "cockpit",
-                "right": "storage",
+                "left": "hall",
             },
             interactions=[
                 RoomInteraction(
@@ -114,7 +129,7 @@ init python:
             _("Склад"),
             "lounge.png",
             exits={
-                "left": "lounge",
+                "up": "hall",
             },
             interactions=[
                 RoomInteraction(
@@ -136,6 +151,17 @@ init python:
                     ysize=260,
                 ),
             ],
+        ),
+        "hall": Room(
+            "hall",
+            _("Главный коридор"),
+            "Hall.png",
+            exits={
+                "left": "cockpit",
+                "right": "lounge",
+                "down": "storage",
+            },
+            interactions=[],
         ),
     }
 
@@ -295,7 +321,7 @@ init python:
 
 default current_room_id = "lounge"
 default jean_dialogue_seen = False
-
+default crash_occurred = False
 default storage_fuses_collected = False
 default selected_fuse_indexes = []
 default burned_fuses = []
@@ -310,6 +336,7 @@ default magic_hash_answer = []
 default magic_hash_selected = []
 default magic_hash_message = ""
 default magic_hash_solved = False
+default room_phrase_message = None
 
 
 label room_navigation:
@@ -317,9 +344,14 @@ label room_navigation:
     jump room_navigation
 
 
+label blocked_lounge_after_crash:
+    Author "Дверь в комнату отдыха не открывается"
+    jump room_navigation
+
+
 label collect_storage_fuses:
     if storage_fuses_collected:
-        alexander "Ящик пуст. Все подходящие предохранители уже у меня."
+        jump storage_fuses_empty
     else:
         $ player_inventory.add("fuse_3", 1)
         $ player_inventory.add("fuse_5", 1)
@@ -328,8 +360,16 @@ label collect_storage_fuses:
         $ player_inventory.add("fuse_9", 1)
         $ player_inventory.add("fuse_11", 1)
         $ storage_fuses_collected = True
-        alexander "Я нашёл несколько предохранителей разного сопротивления. Этого должно хватить, если не сжечь нужные варианты."
+        jump storage_fuses_collected
 
+
+label storage_fuses_empty:
+    Author "Ящик пуст. Все подходящие предохранители уже у меня."
+    jump room_navigation
+
+
+label storage_fuses_collected:
+    Author "Я нашёл несколько предохранителей разного сопротивления. Этого должно хватить, если не сжечь нужные варианты."
     jump room_navigation
 
 
@@ -416,6 +456,16 @@ screen room_navigation():
                 action Function(set_current_room, room.exits["down"])
                 xalign 0.5
                 yalign 0.94
+
+    if room_phrase_message:
+        button:
+            style "room_phrase_button"
+            action Function(hide_room_phrase)
+            xalign 0.5
+            yalign 0.98
+
+            text "[room_phrase_message!t]":
+                style "room_phrase_text"
 
 
 screen electricity_minigame():
@@ -553,6 +603,8 @@ style room_title_panel is empty
 style room_title_text is gui_text
 style room_interaction_button is button
 style room_arrow_button is button
+style room_phrase_button is button
+style room_phrase_text is gui_text
 style fuse_game_frame is empty
 style fuse_game_title is gui_text
 style fuse_game_text is gui_text
@@ -604,6 +656,20 @@ style room_arrow_button_text:
     text_align 0.5
     xalign 0.5
     yalign 0.5
+
+style room_phrase_button is default:
+    background Solid("#000000cc")
+    hover_background Solid("#111111dd")
+    padding (28, 22)
+    xsize 1400
+    ysize 140
+
+style room_phrase_text:
+    size 30
+    color "#ffffff"
+    xalign 0.5
+    yalign 0.5
+    text_align 0.5
 
 style fuse_game_frame:
     background Solid("#111722f2")
