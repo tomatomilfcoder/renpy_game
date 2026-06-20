@@ -238,6 +238,15 @@ define item_lab_circuit = register_item(Item(
     max_stack=1,
 ))
 
+define item_resin = register_item(Item(
+    "resin",
+    _("Смола"),
+    _("Вязкая смола, найденная в электрощитовой."),
+    icon="#7c4a2d",
+    usable=False,
+    max_stack=1,
+))
+
 default player_inventory = Inventory()
 default stacked_notifications = []
 default stacked_notification_next_id = 0

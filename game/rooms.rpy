@@ -140,6 +140,21 @@ init python:
         screwdriver_collected = True
         show_room_phrase(_("Я поднял отвёртку с пола."))
 
+    def collect_resin_from_room():
+        global resin_collected
+
+        if electrical_power_failed:
+            show_room_phrase(_("Сначала нужно восстановить питание."))
+            return
+
+        if resin_collected:
+            show_room_phrase(_("Смолы здесь больше нет."))
+            return
+
+        player_inventory.add("resin", 1)
+        resin_collected = True
+        show_room_phrase(_("Я подобрал смолу."))
+
     def interact_lab_panel():
         global lab_panel_opened
         global lab_panel_inspected
@@ -277,6 +292,15 @@ init python:
                     image="/tools/screwdriver.png",
                     zoom=0.25,
                 ),
+                RoomInteraction(
+                    "resin_floor",
+                    _("Смола"),
+                    "collect_resin",
+                    xpos=1180,
+                    ypos=860,
+                    xsize=220,
+                    ysize=120,
+                ),
             ],
         ),
         "hall": Room(
@@ -325,28 +349,28 @@ init python:
                     "lab_mouse",
                     _("Мышь"),
                     "inspect_lab_mouse",
-                    xpos=520,
-                    ypos=760,
-                    image="Lab/mouse.png",
-                    zoom=0.35,
+                    xpos=1350,
+                    ypos=770,
+                    xsize=200,
+                    ysize=220,
                 ),
                 RoomInteraction(
                     "lab_microscope",
                     _("Микроскоп"),
                     "inspect_lab_microscope",
-                    xpos=930,
-                    ypos=650,
-                    image="Lab/microscope.png",
-                    zoom=0.35,
+                    xpos=550,
+                    ypos=760,
+                    xsize=270,
+                    ysize=210,
                 ),
                 RoomInteraction(
                     "lab_pressure_chamber",
                     _("Барокамера"),
                     "inspect_lab_pressure_chamber",
-                    xpos=1390,
-                    ypos=760,
-                    image="Lab/Pressure.png",
-                    zoom=0.35,
+                    xpos=990,
+                    ypos=740,
+                    xsize=220,
+                    ysize=120,
                 ),
             ],
         ),
@@ -540,6 +564,7 @@ default jean_dialogue_seen = False
 default crash_occurred = False
 default storage_fuses_collected = False
 default screwdriver_collected = False
+default resin_collected = False
 default lab_panel_inspected = False
 default lab_panel_opened = False
 default lab_circuit_taken = False
@@ -616,6 +641,11 @@ label collect_screwdriver:
     jump room_navigation
 
 
+label collect_resin:
+    $ collect_resin_from_room()
+    jump room_navigation
+
+
 label magic_hash_minigame:
     $ start_magic_hash_puzzle()
     while not magic_hash_solved:
@@ -640,7 +670,7 @@ screen room_navigation():
             style "room_title_text"
 
     for interaction in room.interactions:
-        if (interaction.id != "captain_cockpit" or crash_occurred) and (interaction.id != "screwdriver_floor" or (not screwdriver_collected and not electrical_power_failed)):
+        if (interaction.id != "captain_cockpit" or crash_occurred) and (interaction.id != "screwdriver_floor" or (not screwdriver_collected and not electrical_power_failed)) and (interaction.id != "resin_floor" or (not resin_collected and not electrical_power_failed)):
             if interaction.image:
                 imagebutton:
                     idle Transform(interaction.image, zoom=interaction.zoom)
@@ -651,6 +681,8 @@ screen room_navigation():
                         action Function(interact_lab_panel)
                     elif interaction.id == "screwdriver_floor":
                         action Function(collect_screwdriver_from_room)
+                    elif interaction.id == "resin_floor":
+                        action Function(collect_resin_from_room)
                     elif interaction.id == "captain_cockpit":
                         action Call(interaction.label)
                     else:
@@ -669,6 +701,8 @@ screen room_navigation():
                         action Function(interact_lab_panel)
                     elif interaction.id == "screwdriver_floor":
                         action Function(collect_screwdriver_from_room)
+                    elif interaction.id == "resin_floor":
+                        action Function(collect_resin_from_room)
                     else:
                         action Jump(interaction.label)
                     xpos interaction.xpos
