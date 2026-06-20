@@ -155,6 +155,32 @@ init python:
         resin_collected = True
         show_room_phrase(_("Я подобрал смолу."))
 
+    def collect_meat_from_fridge():
+        global meat_collected
+
+        if meat_collected:
+            show_room_phrase(_("В холодильнике больше нет ничего полезного."))
+            return
+
+        player_inventory.add("meat", 1)
+        meat_collected = True
+        show_room_phrase(_("Я достал из холодильника кусок мяса."))
+
+    def inspect_kitchen_medicine_cabinet():
+        show_room_phrase(_("В шкафчике с медикаментами почти пусто. Нужного лекарства здесь нет."))
+
+    def collect_lab_mouse_from_room():
+        global lab_mouse_collected
+
+        if lab_mouse_collected:
+            show_room_phrase(_("Контейнер для мыши пуст."))
+            return
+
+        player_inventory.add("lab_mouse", 1)
+        lab_mouse_collected = True
+        show_room_phrase(_("Я взял лабораторную мышь в переносном контейнере."))
+
+
     def interact_lab_panel():
         global lab_panel_opened
         global lab_panel_inspected
@@ -348,7 +374,7 @@ init python:
                 RoomInteraction(
                     "lab_mouse",
                     _("Мышь"),
-                    "inspect_lab_mouse",
+                    "collect_lab_mouse",
                     xpos=1350,
                     ypos=770,
                     xsize=200,
@@ -391,7 +417,26 @@ init python:
             exits={
                 "right": "lab",
             },
-            interactions=[],
+            interactions=[
+                RoomInteraction(
+                    "kitchen_fridge",
+                    _("Холодильник"),
+                    "collect_meat",
+                    xpos=430,
+                    ypos=760,
+                    xsize=260,
+                    ysize=420,
+                ),
+                RoomInteraction(
+                    "medicine_cabinet",
+                    _("Шкафчик с медикаментами"),
+                    "inspect_medicine_cabinet",
+                    xpos=1320,
+                    ypos=520,
+                    xsize=320,
+                    ysize=240,
+                ),
+            ],
         ),
         "collecting": Room(
             "kitchen",
@@ -565,6 +610,8 @@ default crash_occurred = False
 default storage_fuses_collected = False
 default screwdriver_collected = False
 default resin_collected = False
+default meat_collected = False
+default lab_mouse_collected = False
 default lab_panel_inspected = False
 default lab_panel_opened = False
 default lab_circuit_taken = False
@@ -646,6 +693,21 @@ label collect_resin:
     jump room_navigation
 
 
+label collect_meat:
+    $ collect_meat_from_fridge()
+    jump room_navigation
+
+
+label inspect_medicine_cabinet:
+    $ inspect_kitchen_medicine_cabinet()
+    jump room_navigation
+
+
+label collect_lab_mouse:
+    $ collect_lab_mouse_from_room()
+    jump room_navigation
+
+
 label magic_hash_minigame:
     $ start_magic_hash_puzzle()
     while not magic_hash_solved:
@@ -670,7 +732,7 @@ screen room_navigation():
             style "room_title_text"
 
     for interaction in room.interactions:
-        if (interaction.id != "captain_cockpit" or crash_occurred) and (interaction.id != "screwdriver_floor" or (not screwdriver_collected and not electrical_power_failed)) and (interaction.id != "resin_floor" or (not resin_collected and not electrical_power_failed)):
+        if (interaction.id != "captain_cockpit" or crash_occurred) and (interaction.id != "screwdriver_floor" or (not screwdriver_collected and not electrical_power_failed)) and (interaction.id != "resin_floor" or (not resin_collected and not electrical_power_failed)) and (interaction.id != "lab_mouse" or not lab_mouse_collected):
             if interaction.image:
                 imagebutton:
                     idle Transform(interaction.image, zoom=interaction.zoom)
@@ -683,6 +745,12 @@ screen room_navigation():
                         action Function(collect_screwdriver_from_room)
                     elif interaction.id == "resin_floor":
                         action Function(collect_resin_from_room)
+                    elif interaction.id == "kitchen_fridge":
+                        action Function(collect_meat_from_fridge)
+                    elif interaction.id == "medicine_cabinet":
+                        action Function(inspect_kitchen_medicine_cabinet)
+                    elif interaction.id == "lab_mouse":
+                        action Function(collect_lab_mouse_from_room)
                     elif interaction.id == "captain_cockpit":
                         action Call(interaction.label)
                     else:
@@ -703,6 +771,12 @@ screen room_navigation():
                         action Function(collect_screwdriver_from_room)
                     elif interaction.id == "resin_floor":
                         action Function(collect_resin_from_room)
+                    elif interaction.id == "kitchen_fridge":
+                        action Function(collect_meat_from_fridge)
+                    elif interaction.id == "medicine_cabinet":
+                        action Function(inspect_kitchen_medicine_cabinet)
+                    elif interaction.id == "lab_mouse":
+                        action Function(collect_lab_mouse_from_room)
                     else:
                         action Jump(interaction.label)
                     xpos interaction.xpos

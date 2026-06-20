@@ -247,6 +247,24 @@ define item_resin = register_item(Item(
     max_stack=1,
 ))
 
+define item_meat = register_item(Item(
+    "meat",
+    _("Кусок мяса"),
+    _("Кусок мяса из холодильника на кухне."),
+    icon="#b45353",
+    usable=False,
+    max_stack=1,
+))
+
+define item_lab_mouse = register_item(Item(
+    "lab_mouse",
+    _("Лабораторная мышь"),
+    _("Живая лабораторная мышь в переносном контейнере."),
+    icon="#d1d5db",
+    usable=False,
+    max_stack=1,
+))
+
 default player_inventory = Inventory()
 default stacked_notifications = []
 default stacked_notification_next_id = 0
