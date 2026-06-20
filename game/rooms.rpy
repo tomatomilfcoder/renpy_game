@@ -99,7 +99,7 @@ init python:
         "cockpit": Room(
             "cockpit",
             _("Капитанская рубка"),
-            "cockpit.jpg",
+            "cockpit.png",
             exits={
                 "right": "hall",
             },
