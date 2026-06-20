@@ -38,27 +38,35 @@ init python:
     def room_background(room):
         return Image(room.background)
 
-    def show_room_phrase(message):
+    def show_room_phrase(message, speaker=None):
         global room_phrase_message
+        global room_phrase_speaker
 
         room_phrase_message = message
+        room_phrase_speaker = speaker
         renpy.restart_interaction()
 
     def hide_room_phrase():
         global room_phrase_message
+        global room_phrase_speaker
 
         room_phrase_message = None
+        room_phrase_speaker = None
         renpy.restart_interaction()
 
     FUSE_ITEM_VALUES = {
-        "fuse_3": 3,
-        "fuse_5": 5,
-        "fuse_6": 6,
+        "fuse_neg_13": -13,
+        "fuse_neg_11": -11,
+        "fuse_neg_7": -7,
+        "fuse_neg_5": -5,
+        "fuse_neg_3": -3,
         "fuse_8": 8,
-        "fuse_9": 9,
-        "fuse_11": 11,
+        "fuse_10": 10,
+        "fuse_12": 12,
+        "fuse_15": 15,
+        "fuse_21": 21,
     }
-    FUSE_ITEM_IDS = ["fuse_3", "fuse_5", "fuse_6", "fuse_8", "fuse_9", "fuse_11"]
+    FUSE_ITEM_IDS = ["fuse_neg_13", "fuse_neg_11", "fuse_neg_7", "fuse_neg_5", "fuse_neg_3", "fuse_8", "fuse_10", "fuse_12", "fuse_15", "fuse_21"]
 
     def inventory_fuses():
         fuses = []
@@ -86,12 +94,16 @@ init python:
             show_room_phrase(_("Ящик пуст. Все подходящие предохранители уже у меня."))
             return
 
-        player_inventory.add("fuse_3", 1)
-        player_inventory.add("fuse_5", 1)
-        player_inventory.add("fuse_6", 1)
+        player_inventory.add("fuse_neg_13", 1)
+        player_inventory.add("fuse_neg_11", 1)
+        player_inventory.add("fuse_neg_7", 1)
+        player_inventory.add("fuse_neg_5", 1)
+        player_inventory.add("fuse_neg_3", 1)
         player_inventory.add("fuse_8", 1)
-        player_inventory.add("fuse_9", 1)
-        player_inventory.add("fuse_11", 1)
+        player_inventory.add("fuse_10", 1)
+        player_inventory.add("fuse_12", 1)
+        player_inventory.add("fuse_15", 1)
+        player_inventory.add("fuse_21", 1)
         storage_fuses_collected = True
         show_room_phrase(_("Я нашёл несколько предохранителей разного сопротивления. Этого должно хватить, если не сжечь нужные варианты."))
 
@@ -103,7 +115,17 @@ init python:
             exits={
                 "right": "hall",
             },
-            interactions=[]
+            interactions=[
+                RoomInteraction(
+                    "captain_cockpit",
+                    _("Жан"),
+                    "captain_after_crash",
+                    xpos=900,
+                    ypos=1100,
+                    image="jean",
+                    zoom=0.5,
+                ),
+            ]
         ),
         "lounge": Room(
             "lounge",
@@ -337,6 +359,7 @@ default magic_hash_selected = []
 default magic_hash_message = ""
 default magic_hash_solved = False
 default room_phrase_message = None
+default room_phrase_speaker = None
 
 
 label room_navigation:
@@ -353,12 +376,16 @@ label collect_storage_fuses:
     if storage_fuses_collected:
         jump storage_fuses_empty
     else:
-        $ player_inventory.add("fuse_3", 1)
-        $ player_inventory.add("fuse_5", 1)
-        $ player_inventory.add("fuse_6", 1)
+        $ player_inventory.add("fuse_neg_13", 1)
+        $ player_inventory.add("fuse_neg_11", 1)
+        $ player_inventory.add("fuse_neg_7", 1)
+        $ player_inventory.add("fuse_neg_5", 1)
+        $ player_inventory.add("fuse_neg_3", 1)
         $ player_inventory.add("fuse_8", 1)
-        $ player_inventory.add("fuse_9", 1)
-        $ player_inventory.add("fuse_11", 1)
+        $ player_inventory.add("fuse_10", 1)
+        $ player_inventory.add("fuse_12", 1)
+        $ player_inventory.add("fuse_15", 1)
+        $ player_inventory.add("fuse_21", 1)
         $ storage_fuses_collected = True
         jump storage_fuses_collected
 
@@ -375,8 +402,6 @@ label storage_fuses_collected:
 
 label electrical_panel:
     call screen electricity_minigame
-    if not electrical_power_failed and not electrical_repair_dialogue_seen:
-        jump after_electrical_repair
     jump room_navigation
 
 
@@ -404,32 +429,33 @@ screen room_navigation():
             style "room_title_text"
 
     for interaction in room.interactions:
-        if interaction.image:
-            imagebutton:
-                idle Transform(interaction.image, zoom=interaction.zoom)
-                hover Transform(interaction.image, zoom=interaction.zoom, matrixcolor=BrightnessMatrix(0.18))
-                if interaction.id == "fuse_box":
-                    action Function(collect_storage_fuses_from_room)
-                else:
-                    action Jump(interaction.label)
-                xpos interaction.xpos
-                ypos interaction.ypos
-                xanchor 0.5
-                yanchor 1.0
-                alt interaction.name
-        else:
-            textbutton "[interaction.name!t]":
-                style "room_interaction_button"
-                if interaction.id == "fuse_box":
-                    action Function(collect_storage_fuses_from_room)
-                else:
-                    action Jump(interaction.label)
-                xpos interaction.xpos
-                ypos interaction.ypos
-                xanchor 0.5
-                yanchor 1.0
-                xsize interaction.xsize
-                ysize interaction.ysize
+        if interaction.id != "captain_cockpit" or crash_occurred:
+            if interaction.image:
+                imagebutton:
+                    idle Transform(interaction.image, zoom=interaction.zoom)
+                    hover Transform(interaction.image, zoom=interaction.zoom, matrixcolor=BrightnessMatrix(0.18))
+                    if interaction.id == "fuse_box":
+                        action Function(collect_storage_fuses_from_room)
+                    else:
+                        action Jump(interaction.label)
+                    xpos interaction.xpos
+                    ypos interaction.ypos
+                    xanchor 0.5
+                    yanchor 1.0
+                    alt interaction.name
+            else:
+                textbutton "[interaction.name!t]":
+                    style "room_interaction_button"
+                    if interaction.id == "fuse_box":
+                        action Function(collect_storage_fuses_from_room)
+                    else:
+                        action Jump(interaction.label)
+                    xpos interaction.xpos
+                    ypos interaction.ypos
+                    xanchor 0.5
+                    yanchor 1.0
+                    xsize interaction.xsize
+                    ysize interaction.ysize
 
     $ exits_unlocked = jean_dialogue_seen or room.id != "lounge"
 
@@ -463,14 +489,25 @@ screen room_navigation():
                 yalign 0.94
 
     if room_phrase_message:
+        timer 2.0 action Function(hide_room_phrase)
+
         button:
             style "room_phrase_button"
             action Function(hide_room_phrase)
             xalign 0.5
             yalign 0.98
 
-            text "[room_phrase_message!t]":
-                style "room_phrase_text"
+            vbox:
+                spacing 8
+                xalign 0.5
+                yalign 0.5
+
+                if room_phrase_speaker:
+                    text "[room_phrase_speaker!t]":
+                        style "room_phrase_speaker_text"
+
+                text "[room_phrase_message!t]":
+                    style "room_phrase_text"
 
 
 screen electricity_minigame():
@@ -609,6 +646,7 @@ style room_title_text is gui_text
 style room_interaction_button is button
 style room_arrow_button is button
 style room_phrase_button is button
+style room_phrase_speaker_text is gui_text
 style room_phrase_text is gui_text
 style fuse_game_frame is empty
 style fuse_game_title is gui_text
@@ -674,6 +712,13 @@ style room_phrase_text:
     color "#ffffff"
     xalign 0.5
     yalign 0.5
+    text_align 0.5
+
+style room_phrase_speaker_text:
+    size 24
+    color gui.accent_color
+    bold True
+    xalign 0.5
     text_align 0.5
 
 style fuse_game_frame:

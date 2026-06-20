@@ -129,29 +129,47 @@ init python:
             player_inventory.remove(item_id)
             push_game_notification(_("Использовано: [name]").format(name=item.name))
 
-define item_fuse_3 = register_item(Item(
-    "fuse_3",
-    _("Предохранитель 3 Ом"),
-    _("Предохранитель для аварийного электрощита. Сопротивление: 3 Ом."),
+define item_fuse_neg_13 = register_item(Item(
+    "fuse_neg_13",
+    _("Предохранитель -13 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: -13 Ом."),
     icon="#e0c066",
     usable=False,
     max_stack=3,
 ))
 
-define item_fuse_5 = register_item(Item(
-    "fuse_5",
-    _("Предохранитель 5 Ом"),
-    _("Предохранитель для аварийного электрощита. Сопротивление: 5 Ом."),
+define item_fuse_neg_11 = register_item(Item(
+    "fuse_neg_11",
+    _("Предохранитель -11 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: -11 Ом."),
     icon="#d8944a",
     usable=False,
     max_stack=3,
 ))
 
-define item_fuse_6 = register_item(Item(
-    "fuse_6",
-    _("Предохранитель 6 Ом"),
-    _("Предохранитель для аварийного электрощита. Сопротивление: 6 Ом."),
+define item_fuse_neg_7 = register_item(Item(
+    "fuse_neg_7",
+    _("Предохранитель -7 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: -7 Ом."),
     icon="#c96b42",
+    usable=False,
+    max_stack=3,
+))
+
+define item_fuse_neg_5 = register_item(Item(
+    "fuse_neg_5",
+    _("Предохранитель -5 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: -5 Ом."),
+    icon="#ba5b64",
+    usable=False,
+    max_stack=3,
+))
+
+define item_fuse_neg_3 = register_item(Item(
+    "fuse_neg_3",
+    _("Предохранитель -3 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: -3 Ом."),
+    icon="#b04f86",
     usable=False,
     max_stack=3,
 ))
@@ -165,20 +183,38 @@ define item_fuse_8 = register_item(Item(
     max_stack=3,
 ))
 
-define item_fuse_9 = register_item(Item(
-    "fuse_9",
-    _("Предохранитель 9 Ом"),
-    _("Предохранитель для аварийного электрощита. Сопротивление: 9 Ом."),
+define item_fuse_10 = register_item(Item(
+    "fuse_10",
+    _("Предохранитель 10 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: 10 Ом."),
     icon="#6f8ed8",
     usable=False,
     max_stack=3,
 ))
 
-define item_fuse_11 = register_item(Item(
-    "fuse_11",
-    _("Предохранитель 11 Ом"),
-    _("Предохранитель для аварийного электрощита. Сопротивление: 11 Ом."),
+define item_fuse_12 = register_item(Item(
+    "fuse_12",
+    _("Предохранитель 12 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: 12 Ом."),
     icon="#5da890",
+    usable=False,
+    max_stack=3,
+))
+
+define item_fuse_15 = register_item(Item(
+    "fuse_15",
+    _("Предохранитель 15 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: 15 Ом."),
+    icon="#62a85d",
+    usable=False,
+    max_stack=3,
+))
+
+define item_fuse_21 = register_item(Item(
+    "fuse_21",
+    _("Предохранитель 21 Ом"),
+    _("Предохранитель для аварийного электрощита. Сопротивление: 21 Ом."),
+    icon="#a8a35d",
     usable=False,
     max_stack=3,
 ))

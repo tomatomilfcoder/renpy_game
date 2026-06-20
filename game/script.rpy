@@ -241,9 +241,22 @@ label jean_dialogue:
 
     $ jean_dialogue_seen = True
     $ current_room_id = "hall"
+    hide jean
     jump room_navigation
 
 label start_scene:
+    jump room_navigation
+
+
+label captain_after_crash:
+    if electrical_power_failed:
+        jean "Нужно восстановить питание. Найдите предохранители и почините щиток в служебном отсеке."
+        jump room_navigation
+
+    if not electrical_repair_dialogue_seen:
+        jump after_electrical_repair
+
+    jean "Питание держится. Теперь нужно понять, что это за кислота и как выбраться наверх."
     jump room_navigation
 
 
@@ -317,6 +330,7 @@ label acid_analysis_dialogue:
     jean "Значит… лекарств нет."
     jean "Тогда нам остаётся только одно... Попробовать добраться до поверхности."
 
+    hide jean
     jump room_navigation
 
 label after_crash:
