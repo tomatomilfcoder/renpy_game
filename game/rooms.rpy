@@ -70,7 +70,6 @@ init python:
             "cockpit.jpg",
             exits={
                 "right": "lounge",
-                "down": "storage",
             },
             interactions=[]
         ),
@@ -80,6 +79,7 @@ init python:
             "lounge.png",
             exits={
                 "left": "cockpit",
+                "right": "storage",
             },
             interactions=[
                 RoomInteraction(
@@ -98,7 +98,7 @@ init python:
             _("Склад"),
             "lounge.png",
             exits={
-                "up": "cockpit",
+                "left": "lounge",
             },
             interactions=[
                 RoomInteraction(
