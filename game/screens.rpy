@@ -355,7 +355,7 @@ screen main_menu():
     ## This ensures that any other menu screen is replaced.
     tag menu
 
-    add "bg1.png":
+    add "lounge.png":
         xysize (1920, 1080)
 
     add "#00000099"
