@@ -254,19 +254,19 @@ init python:
                     "fuse_box",
                     _("Ящик с\nпредохранителями"),
                     "collect_storage_fuses",
-                    xpos=800,
+                    xpos=650,
                     ypos=500,
-                    xsize=350,
-                    ysize=150,
+                    xsize=190,
+                    ysize=120,
                 ),
                 RoomInteraction(
                     "electrical_panel",
                     _("Электрощит"),
                     "electrical_panel",
                     xpos=1600,
-                    ypos=480,
+                    ypos=610,
                     xsize=200,
-                    ysize=100,
+                    ysize=400,
                 ),
                 RoomInteraction(
                     "screwdriver_floor",
@@ -303,10 +303,10 @@ init python:
                     "lab_panel",
                     _("Панель двери"),
                     "lab_panel",
-                    xpos=960,
-                    ypos=720,
-                    xsize=360,
-                    ysize=260,
+                    xpos=635,
+                    ypos=600,
+                    xsize=65,
+                    ysize=150,
                 ),
             ],
         ),
@@ -318,6 +318,7 @@ init python:
                 "down": "hall",
                 "right": "rockets",
                 "left": "kitchen",
+                "up": "collecting",
             },
             interactions=[],
         ),
@@ -337,6 +338,15 @@ init python:
             "kitchen.png",
             exits={
                 "right": "lab",
+            },
+            interactions=[],
+        ),
+        "collecting": Room(
+            "kitchen",
+            _("Кухня"),
+            "collecting.png",
+            exits={
+                "down": "lab",
             },
             interactions=[],
         ),
@@ -622,28 +632,9 @@ screen room_navigation():
                     xanchor 0.5
                     yanchor 1.0
                     alt interaction.name
-            # else:
-            #     textbutton "[interaction.name!t]":
-            #         style "room_interaction_button"
-            #         if interaction.id == "fuse_box":
-            #             action Function(collect_storage_fuses_from_room)
-            #         elif interaction.id == "lab_panel":
-            #             action Function(interact_lab_panel)
-            #         elif interaction.id == "screwdriver_floor":
-            #             action Function(collect_screwdriver_from_room)
-            #         else:
-            #             action Jump(interaction.label)
-            #         xpos interaction.xpos
-            #         ypos interaction.ypos
-            #         xanchor 0.5
-            #         yanchor 1.0
-            #         xsize interaction.xsize
-            #         ysize interaction.ysize
             else:
-                button:
-                    background None
-                    hover_background None
-
+                textbutton "[interaction.name!t]":
+                    style "room_interaction_button"
                     if interaction.id == "fuse_box":
                         action Function(collect_storage_fuses_from_room)
                     elif interaction.id == "lab_panel":
@@ -652,13 +643,32 @@ screen room_navigation():
                         action Function(collect_screwdriver_from_room)
                     else:
                         action Jump(interaction.label)
-
                     xpos interaction.xpos
                     ypos interaction.ypos
                     xanchor 0.5
                     yanchor 1.0
                     xsize interaction.xsize
                     ysize interaction.ysize
+            # else:
+            #     button:
+            #         background None
+            #         hover_background None
+
+            #         if interaction.id == "fuse_box":
+            #             action Function(collect_storage_fuses_from_room)
+            #         elif interaction.id == "lab_panel":
+            #             action Function(interact_lab_panel)
+            #         elif interaction.id == "screwdriver_floor":
+            #             action Function(collect_screwdriver_from_room)
+            #         else:
+            #             action Jump(interaction.label)
+
+            #         xpos interaction.xpos
+            #         ypos interaction.ypos
+            #         xanchor 0.5
+            #         yanchor 1.0
+            #         xsize interaction.xsize
+            #         ysize interaction.ysize
 
     $ exits_unlocked = jean_dialogue_seen or room.id != "lounge"
 
