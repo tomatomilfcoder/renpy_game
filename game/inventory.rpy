@@ -123,6 +123,8 @@ init python:
             push_game_notification(_("Этот предмет нельзя использовать."))
             return
 
+        renpy.hide_screen("inventory")
+
         if item.use_label:
             renpy.call_in_new_context(item.use_label)
         else:
@@ -243,6 +245,15 @@ define item_resin = register_item(Item(
     _("Смола"),
     _("Вязкая смола, найденная в электрощитовой."),
     icon="#7c4a2d",
+    usable=False,
+    max_stack=1,
+))
+
+define item_acid_vial = register_item(Item(
+    "acid_vial",
+    _("Колба с кислотой"),
+    _("Колба с образцом глубоководной кислоты из лаборатории."),
+    icon="#a3e635",
     usable=False,
     max_stack=1,
 ))
