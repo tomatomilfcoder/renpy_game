@@ -247,15 +247,6 @@ define item_resin = register_item(Item(
     max_stack=1,
 ))
 
-define item_meat = register_item(Item(
-    "meat",
-    _("Кусок мяса"),
-    _("Кусок мяса из холодильника на кухне."),
-    icon="#b45353",
-    usable=False,
-    max_stack=1,
-))
-
 define item_lab_mouse = register_item(Item(
     "lab_mouse",
     _("Лабораторная мышь"),
@@ -263,6 +254,46 @@ define item_lab_mouse = register_item(Item(
     icon="#d1d5db",
     usable=False,
     max_stack=1,
+))
+
+define item_anti_inflammatory = register_item(Item(
+    "anti_inflammatory",
+    _("Противовоспалительное"),
+    _("Препарат против воспаления. Может пригодиться при заражении или травмах."),
+    icon="#60a5fa",
+    usable=True,
+    max_stack=3,
+    use_label="use_anti_inflammatory",
+))
+
+define item_painkiller = register_item(Item(
+    "painkiller",
+    _("Обезболивающее"),
+    _("Снимает боль, но не лечит причину."),
+    icon="#f9fafb",
+    usable=True,
+    max_stack=3,
+    use_label="use_painkiller",
+))
+
+define item_antiseptic = register_item(Item(
+    "antiseptic",
+    _("Антисептик"),
+    _("Средство для обработки ран и инструментов."),
+    icon="#93c5fd",
+    usable=True,
+    max_stack=3,
+    use_label="use_antiseptic",
+))
+
+define item_microorganism_vial = register_item(Item(
+    "microorganism_vial",
+    _("Колба с микроорганизмами"),
+    _("Колба с образцом глубоководных микроорганизмов. Активность образца требует изучения."),
+    icon="#34d399",
+    usable=True,
+    max_stack=1,
+    use_label="use_microorganism_vial",
 ))
 
 default player_inventory = Inventory()
@@ -291,6 +322,22 @@ label use_antidote:
 
 label use_screwdriver:
     $ use_screwdriver_on_lab_panel()
+    return
+
+label use_microorganism_vial:
+    $ use_microorganism_vial_on_mouse()
+    return
+
+label use_anti_inflammatory:
+    $ use_medicine_on_mouse("anti_inflammatory")
+    return
+
+label use_painkiller:
+    $ use_medicine_on_mouse("painkiller")
+    return
+
+label use_antiseptic:
+    $ use_medicine_on_mouse("antiseptic")
     return
 
 

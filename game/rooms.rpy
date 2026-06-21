@@ -155,19 +155,21 @@ init python:
         resin_collected = True
         show_room_phrase(_("Я подобрал смолу."))
 
-    def collect_meat_from_fridge():
-        global meat_collected
+    def inspect_kitchen_medicine_cabinet():
+        global medicine_cabinet_collected
+        global microorganism_activity
 
-        if meat_collected:
-            show_room_phrase(_("В холодильнике больше нет ничего полезного."))
+        if medicine_cabinet_collected:
+            show_room_phrase(_("В шкафчике с медикаментами больше ничего полезного нет."))
             return
 
-        player_inventory.add("meat", 1)
-        meat_collected = True
-        show_room_phrase(_("Я достал из холодильника кусок мяса."))
-
-    def inspect_kitchen_medicine_cabinet():
-        show_room_phrase(_("В шкафчике с медикаментами почти пусто. Нужного лекарства здесь нет."))
+        player_inventory.add("anti_inflammatory", 1)
+        player_inventory.add("painkiller", 1)
+        player_inventory.add("antiseptic", 1)
+        player_inventory.add("microorganism_vial", 1)
+        microorganism_activity = 60
+        medicine_cabinet_collected = True
+        show_room_phrase(_("Я забрал из шкафчика медикаменты и колбу с микроорганизмами. Активность образца около 60%."))
 
     def collect_lab_mouse_from_room():
         global lab_mouse_collected
@@ -179,6 +181,105 @@ init python:
         player_inventory.add("lab_mouse", 1)
         lab_mouse_collected = True
         show_room_phrase(_("Я взял лабораторную мышь в переносном контейнере."))
+
+    def clamp_microorganism_activity():
+        global microorganism_activity
+
+        microorganism_activity = max(0, min(100, microorganism_activity))
+
+    def use_microorganism_vial_on_mouse():
+        global lab_mouse_infected
+
+        if not player_inventory.has("microorganism_vial"):
+            return
+
+        if current_room_id != "lab":
+            push_game_notification(_("Сначала нужно подготовить эксперимент в лаборатории."))
+            return
+
+        if not player_inventory.has("lab_mouse"):
+            push_game_notification(_("Нужна лабораторная мышь для проверки образца."))
+            return
+
+        if lab_mouse_infected:
+            push_game_notification(_("Мышь уже заражена образцом."))
+            return
+
+        lab_mouse_infected = True
+        renpy.hide_screen("inventory")
+        show_room_phrase(_("Я нанёс образец на лабораторную мышь. Теперь можно наблюдать реакцию."))
+
+    def use_medicine_on_mouse(medicine_id):
+        global microorganism_activity
+
+        if current_room_id != "lab":
+            push_game_notification(_("Здесь препарат использовать не на чем."))
+            return
+
+        if not lab_mouse_infected:
+            push_game_notification(_("Сначала нужно заразить лабораторную мышь образцом."))
+            return
+
+        if medicine_id == "anti_inflammatory":
+            microorganism_activity -= 20
+            player_inventory.remove("anti_inflammatory", 1)
+            clamp_microorganism_activity()
+            renpy.hide_screen("inventory")
+            show_room_phrase(_("Я нанёс противовоспалительное на заражённую мышь. Реакцию нужно проверить под микроскопом."))
+            return
+
+        if medicine_id == "painkiller":
+            player_inventory.remove("painkiller", 1)
+            renpy.hide_screen("inventory")
+            show_room_phrase(_("Я нанёс обезболивающее на заражённую мышь. Видимой реакции нет."))
+            return
+
+        if medicine_id == "antiseptic":
+            microorganism_activity += 10
+            player_inventory.remove("antiseptic", 1)
+            clamp_microorganism_activity()
+            renpy.hide_screen("inventory")
+            show_room_phrase(_("Я нанёс антисептик на заражённую мышь. Образец выглядит раздражённым."))
+
+    def inspect_microorganisms_with_microscope():
+        if not player_inventory.has("microorganism_vial"):
+            show_room_phrase(_("Нечего рассматривать. Нужен образец в колбе."))
+            return
+
+        if not lab_mouse_infected:
+            show_room_phrase(_("В колбе микроорганизмы движутся синхронно. Текущая активность — [microorganism_activity]%."))
+            return
+
+        microscope_result_image = "rvota/rvota_less.png" if microorganism_activity <= 40 else "rvota/rvvota_more.png"
+        renpy.show_screen("microorganism_microscope_result", microscope_result_image)
+
+        show_room_phrase(_("Под микроскопом видна активность микроорганизмов на образце волоса. Текущая активность — [microorganism_activity]%."))
+
+    def apply_pressure_chamber(mode):
+        global microorganism_activity
+        global pressure_chamber_message
+
+        if not lab_mouse_infected:
+            pressure_chamber_message = _("Барокамера готова, но сначала нужно подготовить заражённую мышь.")
+            renpy.restart_interaction()
+            return
+
+        if microorganism_activity <= 0:
+            pressure_chamber_message = _("Образец больше не проявляет заметной реакции.")
+            renpy.restart_interaction()
+            return
+
+        if mode == "low":
+            microorganism_activity -= 20
+            pressure_chamber_message = _("Давление понижено. Мышь пережила процедуру, образец нужно проверить под микроскопом.")
+        elif mode == "high":
+            microorganism_activity += 10
+            pressure_chamber_message = _("Давление повышено. Мышь заметно нервничает, образец нужно проверить под микроскопом.")
+        else:
+            pressure_chamber_message = _("Давление оставлено без изменений. Существенной реакции не видно.")
+
+        clamp_microorganism_activity()
+        renpy.restart_interaction()
 
 
     def interact_lab_panel():
@@ -419,15 +520,6 @@ init python:
             },
             interactions=[
                 RoomInteraction(
-                    "kitchen_fridge",
-                    _("Холодильник"),
-                    "collect_meat",
-                    xpos=430,
-                    ypos=760,
-                    xsize=260,
-                    ysize=420,
-                ),
-                RoomInteraction(
                     "medicine_cabinet",
                     _("Шкафчик с медикаментами"),
                     "inspect_medicine_cabinet",
@@ -610,8 +702,10 @@ default crash_occurred = False
 default storage_fuses_collected = False
 default screwdriver_collected = False
 default resin_collected = False
-default meat_collected = False
 default lab_mouse_collected = False
+default medicine_cabinet_collected = False
+default lab_mouse_infected = False
+default microorganism_activity = 0
 default lab_panel_inspected = False
 default lab_panel_opened = False
 default lab_circuit_taken = False
@@ -625,6 +719,7 @@ default electrical_repair_dialogue_seen = False
 default electrical_target_resistance = 17
 default electrical_hidden_consumption_limit = 21
 default fuse_status_message = "Электричество выбило. Соберите предохранители с суммой сопротивления 17."
+default pressure_chamber_message = "Выберите режим давления для барокамеры."
 default magic_hash_full_square = []
 default magic_hash_puzzle = []
 default magic_hash_answer = []
@@ -693,11 +788,6 @@ label collect_resin:
     jump room_navigation
 
 
-label collect_meat:
-    $ collect_meat_from_fridge()
-    jump room_navigation
-
-
 label inspect_medicine_cabinet:
     $ inspect_kitchen_medicine_cabinet()
     jump room_navigation
@@ -745,12 +835,14 @@ screen room_navigation():
                         action Function(collect_screwdriver_from_room)
                     elif interaction.id == "resin_floor":
                         action Function(collect_resin_from_room)
-                    elif interaction.id == "kitchen_fridge":
-                        action Function(collect_meat_from_fridge)
                     elif interaction.id == "medicine_cabinet":
                         action Function(inspect_kitchen_medicine_cabinet)
                     elif interaction.id == "lab_mouse":
                         action Function(collect_lab_mouse_from_room)
+                    elif interaction.id == "lab_microscope":
+                        action Function(inspect_microorganisms_with_microscope)
+                    elif interaction.id == "lab_pressure_chamber":
+                        action Show("pressure_chamber_interface")
                     elif interaction.id == "captain_cockpit":
                         action Call(interaction.label)
                     else:
@@ -771,12 +863,14 @@ screen room_navigation():
                         action Function(collect_screwdriver_from_room)
                     elif interaction.id == "resin_floor":
                         action Function(collect_resin_from_room)
-                    elif interaction.id == "kitchen_fridge":
-                        action Function(collect_meat_from_fridge)
                     elif interaction.id == "medicine_cabinet":
                         action Function(inspect_kitchen_medicine_cabinet)
                     elif interaction.id == "lab_mouse":
                         action Function(collect_lab_mouse_from_room)
+                    elif interaction.id == "lab_microscope":
+                        action Function(inspect_microorganisms_with_microscope)
+                    elif interaction.id == "lab_pressure_chamber":
+                        action Show("pressure_chamber_interface")
                     else:
                         action Jump(interaction.label)
                     xpos interaction.xpos
@@ -986,6 +1080,80 @@ screen magic_hash_minigame():
                     action Return()
 
 
+screen pressure_chamber_interface():
+    modal True
+    zorder 150
+
+    on "show" action SetVariable("pressure_chamber_message", _("Выберите режим давления для барокамеры."))
+
+    add "#05070bcc"
+
+    frame:
+        style "pressure_chamber_frame"
+        xalign 0.5
+        yalign 0.5
+
+        vbox:
+            spacing 18
+
+            text _("Барокамера"):
+                style "pressure_chamber_title"
+
+            text _("Настройте давление для камеры с заражённой мышью. Прибор не показывает активность микроорганизмов — результат придётся проверить под микроскопом."):
+                style "pressure_chamber_text"
+
+            hbox:
+                spacing 12
+                xalign 0.5
+
+                textbutton _("Понизить давление"):
+                    style "pressure_chamber_button"
+                    action Function(apply_pressure_chamber, "low")
+
+                textbutton _("Нормальное давление"):
+                    style "pressure_chamber_button"
+                    action Function(apply_pressure_chamber, "normal")
+
+                textbutton _("Повысить давление"):
+                    style "pressure_chamber_button"
+                    action Function(apply_pressure_chamber, "high")
+
+            text "[pressure_chamber_message!t]":
+                style "pressure_chamber_message"
+
+            textbutton _("Закрыть"):
+                style "fuse_action_button"
+                xalign 0.5
+                action Hide("pressure_chamber_interface")
+
+
+screen microorganism_microscope_result(result_image):
+    modal True
+    zorder 160
+
+    add "#000000e6"
+
+    button:
+        background None
+        hover_background None
+        action Hide("microorganism_microscope_result")
+        xfill True
+        yfill True
+
+        vbox:
+            spacing 18
+            xalign 0.5
+            yalign 0.5
+
+            add result_image:
+                xalign 0.5
+                xysize (1400, 760)
+
+            text _("Образец волоса под микроскопом. Нажмите, чтобы закрыть."):
+                style "pressure_chamber_text"
+                xalign 0.5
+
+
 screen game_timer():
     timer 1800.0 action Jump("bad_ending_timeout")
 
@@ -1012,6 +1180,11 @@ style magic_hash_cell is empty
 style magic_hash_cell_text is gui_text
 style magic_hash_number_button is button
 style magic_hash_message is gui_text
+style pressure_chamber_frame is empty
+style pressure_chamber_title is gui_text
+style pressure_chamber_text is gui_text
+style pressure_chamber_button is button
+style pressure_chamber_message is gui_text
 
 style room_title_panel:
     background Solid("#00000099")
@@ -1172,3 +1345,41 @@ style magic_hash_message:
     size 24
     color "#ffffff"
     xsize 820
+
+style pressure_chamber_frame:
+    background Solid("#111722f2")
+    padding (32, 28)
+    xsize 1020
+
+style pressure_chamber_title:
+    size 42
+    color "#ffffff"
+    bold True
+    text_align 0.5
+    xalign 0.5
+
+style pressure_chamber_text:
+    size 24
+    color "#d7dee9"
+    xsize 900
+    text_align 0.5
+
+style pressure_chamber_button is default:
+    background Solid("#273142")
+    hover_background Solid("#3a4b66")
+    padding (16, 10)
+    xsize 260
+    ysize 72
+
+style pressure_chamber_button_text:
+    size 22
+    color "#ffffff"
+    text_align 0.5
+    xalign 0.5
+    yalign 0.5
+
+style pressure_chamber_message:
+    size 24
+    color "#ffffff"
+    xsize 900
+    text_align 0.5
