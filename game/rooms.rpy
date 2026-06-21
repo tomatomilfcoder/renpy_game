@@ -161,17 +161,18 @@ init python:
 
     def collect_acid_vial_from_scene():
         global acid_vial_collected
+        global acid_microorganism_activity
 
         if acid_vial_collected:
             return
 
         player_inventory.add("acid_vial", 1)
+        acid_microorganism_activity = INITIAL_MICROORGANISM_ACTIVITY
         acid_vial_collected = True
         show_room_phrase(_("Я забрал колбу с кислотой для дальнейшего анализа."))
 
     def inspect_kitchen_medicine_cabinet():
         global medicine_cabinet_collected
-        global microorganism_vial_activity
 
         if medicine_cabinet_collected:
             show_room_phrase(_("В шкафчике с медикаментами больше ничего полезного нет."))
@@ -180,10 +181,8 @@ init python:
         player_inventory.add("anti_inflammatory", 1)
         player_inventory.add("painkiller", 1)
         player_inventory.add("antiseptic", 1)
-        player_inventory.add("microorganism_vial", 1)
-        microorganism_vial_activity = INITIAL_MICROORGANISM_ACTIVITY
         medicine_cabinet_collected = True
-        show_room_phrase(_("Я забрал из шкафчика медикаменты и колбу с микроорганизмами."))
+        show_room_phrase(_("Я забрал из шкафчика несколько медикаментов."))
 
     def collect_lab_mouse_from_room():
         global lab_mouse_collected
@@ -202,11 +201,15 @@ init python:
     def microorganism_result_image(activity):
         return "rvota/rvota_less.png" if activity <= 40 else "rvota/rvvota_more.png"
 
-    def use_microorganism_vial_on_mouse():
+    def use_acid_vial_on_mouse():
         global lab_mouse_infected
         global lab_mouse_microorganism_activity
 
-        if not player_inventory.has("microorganism_vial"):
+        if not player_inventory.has("acid_vial"):
+            return
+
+        if not acid_microorganisms_identified:
+            push_game_notification(_("Сначала нужно рассмотреть кислоту под микроскопом."))
             return
 
         if current_room_id != "lab":
@@ -253,16 +256,26 @@ init python:
             show_room_phrase(_("Я нанёс антисептик на заражённую мышь. Видимой реакции нет."))
 
     def inspect_microorganisms_with_microscope(target):
+        global acid_microorganisms_identified
+
         if target == "vial":
-            if not player_inventory.has("microorganism_vial"):
-                show_room_phrase(_("Нечего рассматривать. Нужна колба с микроорганизмами."))
+            if not player_inventory.has("acid_vial"):
+                show_room_phrase(_("Нечего рассматривать. Нужна колба с кислотой."))
                 return
+
+            if not acid_microorganisms_identified:
+                acid_microorganisms_identified = True
+                result_title = _("Колба с кислотой")
+                result_text = _("Это не кислота. В колбе движутся неизвестные микроорганизмы. Активность образца: %d%%.") % acid_microorganism_activity
+            else:
+                result_title = _("Колба с кислотой")
+                result_text = _("Активность микроорганизмов в колбе: %d%%.") % acid_microorganism_activity
 
             renpy.show_screen(
                 "microorganism_microscope_result",
-                microorganism_result_image(microorganism_vial_activity),
-                _("Колба с микроорганизмами"),
-                _("Активность микроорганизмов в колбе: %d%%.") % microorganism_vial_activity,
+                microorganism_result_image(acid_microorganism_activity),
+                result_title,
+                result_text,
             )
             return
 
@@ -280,36 +293,56 @@ init python:
             return
 
     def open_microscope_item_choice():
-        if not player_inventory.has("microorganism_vial") and not lab_mouse_infected:
+        if not player_inventory.has("acid_vial") and not player_inventory.has("lab_mouse"):
             show_room_phrase(_("Нечего рассматривать. Нужен образец микроорганизмов."))
             return
 
         renpy.show_screen("microscope_item_choice")
 
     def apply_pressure_chamber(mode):
-        global microorganism_vial_activity
+        global acid_microorganism_activity
         global pressure_chamber_message
 
-        if not player_inventory.has("microorganism_vial"):
-            pressure_chamber_message = _("В барокамеру нужно поставить колбу с микроорганизмами.")
+        if not player_inventory.has("acid_vial"):
+            pressure_chamber_message = _("В барокамеру нужно поставить колбу с кислотой.")
             renpy.restart_interaction()
             return
 
-        if microorganism_vial_activity <= 0:
+        if not acid_microorganisms_identified:
+            pressure_chamber_message = _("Сначала нужно рассмотреть кислоту под микроскопом.")
+            renpy.restart_interaction()
+            return
+
+        if acid_microorganism_activity <= 0:
             pressure_chamber_message = _("Образец больше не проявляет заметной реакции.")
             renpy.restart_interaction()
             return
 
         if mode == "low":
-            microorganism_vial_activity = clamp_microorganism_activity(microorganism_vial_activity - 25)
+            acid_microorganism_activity = clamp_microorganism_activity(acid_microorganism_activity - 25)
             pressure_chamber_message = _("Давление понижено. Колбу нужно проверить под микроскопом.")
         elif mode == "high":
-            microorganism_vial_activity = clamp_microorganism_activity(microorganism_vial_activity + 15)
+            acid_microorganism_activity = clamp_microorganism_activity(acid_microorganism_activity + 15)
             pressure_chamber_message = _("Давление повышено. Колбу нужно проверить под микроскопом.")
         else:
             pressure_chamber_message = _("Давление оставлено без изменений. Существенной реакции не видно.")
 
         renpy.restart_interaction()
+
+    def final2_solution_found():
+        return (
+            acid_microorganisms_identified
+            and acid_microorganism_activity <= 40
+            and lab_mouse_infected
+            and lab_mouse_microorganism_activity <= 40
+        )
+
+    def launch_rescue_torpedo():
+        if not final2_ready_to_launch:
+            show_room_phrase(_("Пока непонятно, какие данные отправлять на поверхность. Нужно закончить анализ кислоты."))
+            return
+
+        renpy.jump("final2_ending")
 
 
     def interact_lab_panel():
@@ -538,7 +571,17 @@ init python:
             exits={
                 "left": "lab",
             },
-            interactions=[],
+            interactions=[
+                RoomInteraction(
+                    "torpedo_launcher",
+                    _("Запустить\nторпеду"),
+                    "launch_rescue_torpedo",
+                    xpos=960,
+                    ypos=700,
+                    xsize=260,
+                    ysize=140,
+                ),
+            ],
         ),
 
     "kitchen": Room(
@@ -736,8 +779,10 @@ default acid_vial_collected = False
 default lab_mouse_collected = False
 default medicine_cabinet_collected = False
 default lab_mouse_infected = False
-default microorganism_vial_activity = 0
+default acid_microorganism_activity = 0
+default acid_microorganisms_identified = False
 default lab_mouse_microorganism_activity = 0
+default final2_ready_to_launch = False
 default lab_panel_inspected = False
 default lab_panel_opened = False
 default lab_circuit_taken = False
@@ -875,6 +920,8 @@ screen room_navigation():
                         action Function(open_microscope_item_choice)
                     elif interaction.id == "lab_pressure_chamber":
                         action Show("pressure_chamber_interface")
+                    elif interaction.id == "torpedo_launcher":
+                        action Function(launch_rescue_torpedo)
                     elif interaction.id == "captain_cockpit":
                         action Call(interaction.label)
                     else:
@@ -903,6 +950,8 @@ screen room_navigation():
                         action Function(open_microscope_item_choice)
                     elif interaction.id == "lab_pressure_chamber":
                         action Show("pressure_chamber_interface")
+                    elif interaction.id == "torpedo_launcher":
+                        action Function(launch_rescue_torpedo)
                     else:
                         action Jump(interaction.label)
                     xpos interaction.xpos
@@ -1131,7 +1180,7 @@ screen pressure_chamber_interface():
             text _("Барокамера"):
                 style "pressure_chamber_title"
 
-            text _("Настройте давление для колбы с микроорганизмами. Прибор не показывает активность — результат придётся проверить под микроскопом."):
+            text _("Настройте давление для колбы с кислотой. Прибор не показывает активность — результат придётся проверить под микроскопом."):
                 style "pressure_chamber_text"
 
             hbox:
@@ -1179,13 +1228,17 @@ screen microscope_item_choice():
             text _("Выберите предмет для осмотра."):
                 style "pressure_chamber_text"
 
-            textbutton _("Колба с микроорганизмами"):
-                style "microscope_choice_button"
-                action [Hide("microscope_item_choice"), Function(inspect_microorganisms_with_microscope, "vial")]
+            if player_inventory.has("acid_vial"):
+                textbutton _("Колба с кислотой"):
+                    style "microscope_choice_button"
+                    action [Hide("microscope_item_choice"), Function(inspect_microorganisms_with_microscope, "vial")]
 
-            textbutton _("Заражённая мышь"):
-                style "microscope_choice_button"
-                action [Hide("microscope_item_choice"), Function(inspect_microorganisms_with_microscope, "mouse")]
+            if player_inventory.has("lab_mouse"):
+                $ mouse_microscope_label = _("Заражённая мышь") if lab_mouse_infected else _("Лабораторная мышь")
+
+                textbutton "[mouse_microscope_label!t]":
+                    style "microscope_choice_button"
+                    action [Hide("microscope_item_choice"), Function(inspect_microorganisms_with_microscope, "mouse")]
 
             textbutton _("Закрыть"):
                 style "fuse_action_button"

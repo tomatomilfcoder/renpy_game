@@ -429,6 +429,25 @@ screen endings_gallery():
                             text _("Концовка не открыта"):
                                 style "ending_card_locked"
 
+                frame:
+                    style "ending_card"
+
+                    vbox:
+                        spacing 12
+
+                        if persistent.final2_ending_unlocked:
+                            add "buhich_bez_geystva.png":
+                                xysize (360, 220)
+
+                            text _("Хорошая концовка: спасение"):
+                                style "ending_card_title"
+                        else:
+                            add Solid("#000000"):
+                                xysize (360, 220)
+
+                            text _("Концовка не открыта"):
+                                style "ending_card_locked"
+
             textbutton _("Назад"):
                 style "custom_main_menu_button"
                 xalign 0.5

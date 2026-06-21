@@ -254,8 +254,9 @@ define item_acid_vial = register_item(Item(
     _("Колба с кислотой"),
     _("Колба с образцом глубоководной кислоты из лаборатории."),
     icon="#a3e635",
-    usable=False,
+    usable=True,
     max_stack=1,
+    use_label="use_acid_vial",
 ))
 
 define item_lab_mouse = register_item(Item(
@@ -297,16 +298,6 @@ define item_antiseptic = register_item(Item(
     use_label="use_antiseptic",
 ))
 
-define item_microorganism_vial = register_item(Item(
-    "microorganism_vial",
-    _("Колба с микроорганизмами"),
-    _("Колба с образцом глубоководных микроорганизмов. Активность образца требует изучения."),
-    icon="#34d399",
-    usable=True,
-    max_stack=1,
-    use_label="use_microorganism_vial",
-))
-
 default player_inventory = Inventory()
 default stacked_notifications = []
 default stacked_notification_next_id = 0
@@ -335,8 +326,8 @@ label use_screwdriver:
     $ use_screwdriver_on_lab_panel()
     return
 
-label use_microorganism_vial:
-    $ use_microorganism_vial_on_mouse()
+label use_acid_vial:
+    $ use_acid_vial_on_mouse()
     return
 
 label use_anti_inflammatory:
@@ -446,7 +437,7 @@ screen inventory():
                             text "[selected_item.description!t]":
                                 style "inventory_item_description"
 
-                        if selected_item.usable:
+                        if selected_item.usable and (selected_item.id != "acid_vial" or acid_microorganisms_identified):
                             textbutton _("Использовать"):
                                 style "inventory_use_button"
                                 xalign 0.5
