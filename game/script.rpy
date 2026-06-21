@@ -16,6 +16,10 @@ image bar:
     "buhich_bez_geystva.png"
     xysize(1920, 1080)
 
+image port:
+    "Port.png"
+    xysize(1920, 1080)
+
 image bg cockpit_red:
     "/Red/cockpit_red.png"
     xysize(1920, 1080)
