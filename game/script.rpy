@@ -8,6 +8,14 @@ transform shake:
 image jean = "jean.png"
 image alexander = "alexander.png"
 
+image bad_end:
+    "depressia.png"
+    xysize(1920, 1080)
+
+image bar:
+    "buhich_bez_geystva.png"
+    xysize(1920, 1080)
+
 image bg cockpit_red:
     "/Red/cockpit_red.png"
     xysize(1920, 1080)
